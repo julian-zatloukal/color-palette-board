@@ -7,17 +7,17 @@
 }
 
 .post-image .palette div:nth-child(1)  {
-    background-color: aqua;
+    background-color: #E63946;
 }
 .post-image .palette div:nth-child(2)  {
-    background-color:brown;
+    background-color:#F1FAEE;
 }
 .post-image .palette div:nth-child(3)  {
-    background-color: mediumaquamarine;
+    background-color: #A8DADC;
 }
 .post-image .palette div:nth-child(4)  {
-    background-color: green;
+    background-color: #457B9D;
 }
 .post-image .palette div:nth-child(5)  {
-    background-color: mediumaquamarine;
+    background-color: #1D3557;
 }
