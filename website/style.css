@@ -21,3 +21,26 @@
 .post-image .palette div:nth-child(5)  {
     background-color: #1D3557;
 }
+
+/* .container-fluid {
+    margin-left: 3rem;
+} */
+
+/* .like-container {
+    position: absolute;
+} */
+
+.like-btn{
+    /* position: relative;
+    left: 6rem; */
+    /* transform: scale(0.8); */
+    /* justify-self: flex-end;
+    align-self: flex-end;
+    margin-left: auto; */
+    position: relative;
+    bottom: 0.25rem;
+}
+
+/* .palette-post{
+    transform: scale(0.75);
+} */
