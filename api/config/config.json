@@ -1,0 +1,16 @@
+{
+  "development": {
+    "username": "postgres-admin-MkrB3HYjvErA2cA5",
+    "password": "GjS5TZVTPHTMGG7C2vkrspN4",
+    "database": "formulario-escuelas-db",
+    "host": "db",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "postgres-admin-MkrB3HYjvErA2cA5",
+    "password": "GjS5TZVTPHTMGG7C2vkrspN4",
+    "database": "formulario-escuelas-db",
+    "host": "db",
+    "dialect": "postgres"
+  }
+}

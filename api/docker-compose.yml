@@ -1,0 +1,51 @@
+version: "3.8"
+services:
+  db:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root-h9BcipiGGnfuhnGW
+      MONGO_INITDB_ROOT_PASSWORD: zZ4NP1J9JZGunzOfyUCuG6fI
+    networks:
+      - app-network
+  api:
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile
+    environment:
+      DB_HOST: db
+      DB_USER: root-h9BcipiGGnfuhnGW
+      DB_PASS: zZ4NP1J9JZGunzOfyUCuG6fI
+    container_name: node-server
+    depends_on:
+      - db
+    volumes:
+      - .:/home/node/app
+    networks:
+      - app-network
+    ports:
+      - "5000:5000"
+  nextjs:
+    build:
+      context: ../website
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - ../website:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/.next
+    ports:
+      - 3000:3000
+    networks:
+      - app-network
+    environment:
+      API_HOST: api
+      API_PORT: 5000
+    depends_on:
+      - api
+
+networks:
+  app-network:
+    external:
+      name: nginx-network
