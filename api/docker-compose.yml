@@ -2,17 +2,18 @@ version: "3.8"
 services:
   db:
     container_name: mongodb
-    image: mongo:4
+    image: mongo
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root-h9BcipiGGnfuhnGW
       MONGO_INITDB_ROOT_PASSWORD: zZ4NP1J9JZGunzOfyUCuG6fI
-      DB_NAME: palette-board
-      DB_USER: user-2OCHv6OaBxQyFsul
-      DB_PASSWORD: gRU9SvlKLaRGc5AL
+      MONGO_INITDB_DATABASE: palette-board
+      MONGO_INITDB_USERNAME: user-2OCHv6OaBxQyFsul
+      MONGO_INITDB_PASSWORD: gRU9SvlKLaRGc5AL
     volumes:
       - db-data:/data/db
+      - ./docker/mongodb/home/mongodb:/home/mongodb
       - ./docker/mongodb/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
     networks:
       - app-network

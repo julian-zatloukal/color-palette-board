@@ -1,0 +1,5 @@
+var rootUser = 'root-h9BcipiGGnfuhnGW';
+var rootPassword = 'zZ4NP1J9JZGunzOfyUCuG6fI';
+var user = 'user-2OCHv6OaBxQyFsul';
+var passwd = 'gRU9SvlKLaRGc5AL';
+var admin = db.getSiblingDB('admin');
