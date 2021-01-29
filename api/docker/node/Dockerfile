@@ -16,4 +16,4 @@ COPY --chown=node:node . .
 
 EXPOSE 5000
 
-ENTRYPOINT ["sh", "./docker/start-docker.sh"]
+ENTRYPOINT ["sh", "./docker/node/start-docker.sh"]

@@ -1,23 +1,31 @@
 version: "3.8"
 services:
   db:
-    container_name: mongo
-    image: mongo
+    container_name: mongodb
+    image: mongo:4
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root-h9BcipiGGnfuhnGW
       MONGO_INITDB_ROOT_PASSWORD: zZ4NP1J9JZGunzOfyUCuG6fI
+      DB_NAME: palette-board
+      DB_USER: user-2OCHv6OaBxQyFsul
+      DB_PASSWORD: gRU9SvlKLaRGc5AL
+    volumes:
+      - db-data:/data/db
+      - ./docker/mongodb/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
     networks:
       - app-network
+
   api:
     build:
       context: ./
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./docker/node/Dockerfile
     environment:
       DB_HOST: db
-      DB_USER: root-h9BcipiGGnfuhnGW
-      DB_PASS: zZ4NP1J9JZGunzOfyUCuG6fI
+      DB_NAME: palette-board
+      DB_USER: user-2OCHv6OaBxQyFsul
+      DB_PASS: gRU9SvlKLaRGc5AL
     container_name: node-server
     depends_on:
       - db
@@ -28,6 +36,7 @@ services:
     ports:
       - "5000:5000"
   nextjs:
+    container_name: nextjs
     build:
       context: ../website
       dockerfile: ./docker/Dockerfile
@@ -49,3 +58,6 @@ networks:
   app-network:
     external:
       name: nginx-network
+
+volumes:
+  db-data:
