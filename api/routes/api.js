@@ -16,26 +16,41 @@ router.get("/", (req, res) => {
 
 // @desc    Register user
 // @route   POST /users/register
-router.post("/users/register", (req, res) => {
-  let computeHash = req.body.password;
+router.post("/users/register", async (req, res) => {
+  try {
+    // input verification
 
-  var newUser = new User({
-    username: req.body.username,
-    email: req.body.email,
-    passwordHash: computeHash,
-  });
-
-  newUser
-    .save()
-    .then(() => {
-      res.status(200).json({ status: "OK" });
-    })
-    .catch((err) => {
-      res.status(200).json({
+    if (await User.findOne({ username: req.body.username }).exec()) {
+      return res.status(200).json({
         status: "ERR",
-        desc: `Error uploading user to db ${err.message}`,
+        desc: `Username already exists`,
       });
+    }
+
+    if (await User.findOne({ email: req.body.email }).exec()) {
+      return res.status(200).json({
+        status: "ERR",
+        desc: `Email already exists`,
+      });
+    }
+
+    let computeHash = req.body.password;
+
+    var newUser = new User({
+      username: req.body.username,
+      email: req.body.email,
+      passwordHash: computeHash,
     });
+
+    await newUser.save();
+
+    res.status(200).json({ status: "OK" });
+  } catch (err) {
+    res.status(200).json({
+      status: "ERR",
+      desc: `Error uploading user to db ${err.message}`,
+    });
+  }
 });
 
 // @desc    Create post
@@ -44,6 +59,13 @@ router.post("/users/register", (req, res) => {
 router.post("/posts/create", async (req, res) => {
   try {
     let user = await User.findOne({ username: req.body.username }).exec();
+
+    if (!user) {
+      return res.status(200).json({
+        status: "ERR",
+        desc: `Username not found`,
+      });
+    }
 
     let uuid = await new Promise((resolve, reject) => {
       crypto.randomBytes(8, function (ex, buffer) {
@@ -76,10 +98,14 @@ router.post("/posts/create", async (req, res) => {
 // @route   GET /posts
 router.get("/posts", async (req, res) => {
   try {
-    let posts = await Post.find().exec();
-    posts.map((post) => {
-        
-    });
+    let posts = await Post.find().lean().exec();
+
+
+    posts = await Promise.all( posts.map(  async (post) => {
+        let user = await User.findById(post.userId).exec();
+        return {...post, author: {username: user.username, profilePicure: ""}};
+    }));
+
 
     res.status(200).json({ status: "OK", data: posts });
   } catch (err) {

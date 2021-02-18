@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://stackoverflow.com/a/53522699
 # https://stackoverflow.com/a/37811764
-mongo -- "$MONGO_INITDB_DATABASE" <<EOF
+mongo --host db -- "$MONGO_INITDB_DATABASE" <<EOF
   var rootUser = '$MONGO_INITDB_ROOT_USERNAME';
   var rootPassword = '$MONGO_INITDB_ROOT_PASSWORD';
   var user = '$MONGO_INITDB_USERNAME';
