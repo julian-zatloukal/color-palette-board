@@ -35,14 +35,14 @@ const useStyles = makeStyles((theme) => ({
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-export default function Index({ posts }) {
+export default function Index({ posts, userData }) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
 
   return (
     <React.Fragment>
       <CssBaseline />
-      <Navbar />
+      <Navbar userData={userData}/>
       <main>
         <Header />
 
@@ -71,20 +71,32 @@ export const getServerSideProps = async ({ req }) => {
   });
 
   if (cookies["palette-board-token"]) {
-    const res = await (await fetch(`${apiEndpoint}posts`, {
+    /* It's a registered user */
+    const fetchPosts = await (await fetch(`${apiEndpoint}posts`, {
       method: 'GET',
       headers: new Headers({
         'Authorization': `Bearer ${cookies["palette-board-token"]}`, 
       }), 
     })).json();
-    var posts = res.data || [];
+    var posts = fetchPosts.data || [];
+
+    const fetchUserData = await (await fetch(`${apiEndpoint}verifyToken`, {
+      method: 'POST',
+      headers: new Headers({
+        'Authorization': `Bearer ${cookies["palette-board-token"]}`, 
+      }), 
+    })).json();
+    var userData = fetchUserData.data || [];
+
     return {
       props: {
         posts,
+        userData
       },
     };
 
   } else {
+    /* Show public version of the site */ 
     const res = await (await fetch(`${apiEndpoint}posts`)).json();
     var posts = res.data || [];
     return {

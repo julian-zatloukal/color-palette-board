@@ -6,6 +6,10 @@ import AppBar from "@material-ui/core/AppBar";
 import Typography from "@material-ui/core/Typography";
 import PaletteIcon from "@material-ui/icons/Palette";
 import Button from "@material-ui/core/Button";
+import Box from "@material-ui/core/Box";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import { useRouter } from "next/router";
+import Cookies from 'js-cookie';
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -19,9 +23,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Navbar() {
+export default function Navbar({ userData }) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
+  const router = useRouter();
+
+  const logout = () => {
+    Cookies.remove('palette-board-token');
+    router.reload();
+  };
 
   return (
     <div className={classes.root}>
@@ -31,7 +41,28 @@ export default function Navbar() {
           <Typography variant="h6" className={classes.title}>
             Palette Board
           </Typography>
-          <Button color="inherit">Login</Button>
+
+          {userData ? (
+            <Box component="div" display="flex" flexDirection="row">
+              <Box mr={3} component="div" display="flex" alignItems="center">
+                <Typography variant="body1" component="div">
+                  {`Hello, ${userData.username}`}
+                </Typography>
+              </Box>
+
+              <Button
+                color="inherit"
+                onClick={() => logout()}
+                startIcon={<ExitToAppIcon />}
+              >
+                Logout
+              </Button>
+            </Box>
+          ) : (
+            <Button color="inherit" onClick={() => router.push("/login")}>
+              Login
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
     </div>

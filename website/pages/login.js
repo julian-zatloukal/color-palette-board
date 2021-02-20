@@ -15,11 +15,11 @@ import Container from "@material-ui/core/Container";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from "@material-ui/lab/Alert";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 import { green } from "@material-ui/core/colors";
 
-import { useRouter } from 'next/router'
+import { useRouter } from "next/router";
 import usePersistedState, {
   getPersistedState,
   setPersistedState,
@@ -66,24 +66,22 @@ const Login = () => {
   const [rememberUser, setRememberUser] = useState(false);
   const usernameInputRef = useRef();
   const passwordInputRef = useRef();
-
+  const submitButtonRef = useRef();
 
   useEffect(() => {
-    
     if (getPersistedState("palette-board-remember-user", undefined)) {
       setUsername(getPersistedState("palette-board-remember-user", ""));
       passwordInputRef.current.focus();
-    } else{
+    } else {
       usernameInputRef.current.focus();
     }
-  }, [])
-
+  }, []);
 
   const Alert = (props) => {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
   };
 
-  const LoginButton = ({ onClick, alertCallback }) => {
+  const LoginButton = ({ onClick, alertCallback, reference }) => {
     const useStyles = makeStyles((theme) => ({
       root: {
         marginTop: "1rem",
@@ -144,6 +142,7 @@ const Login = () => {
             className={buttonClassname}
             disabled={loading}
             onClick={handleButtonClick}
+            ref={reference}
           >
             Ingresar
           </Button>
@@ -189,19 +188,19 @@ const Login = () => {
     }
 
     if (res.status === "OK") {
-      Cookies.set('palette-board-token', res.token);
+      Cookies.set("palette-board-token", res.token);
 
-      if(rememberUser){
+      if (rememberUser) {
         window.localStorage.setItem(
           "palette-board-remember-user",
           JSON.stringify(username)
         );
       } else {
-        if (window.localStorage.getItem("palette-board-remember-user")){
+        if (window.localStorage.getItem("palette-board-remember-user")) {
           window.localStorage.removeItem("palette-board-remember-user");
         }
       }
-      
+
       router.push("/");
     } else {
       throw new Error("Usuario o contraseña incorrecto.");
@@ -223,6 +222,21 @@ const Login = () => {
 
     setAlertOpen(false);
   };
+
+
+  useEffect(() => {
+    const listener = event => {
+      if (event.code === "Enter" || event.code === "NumpadEnter") {
+        submitButtonRef.current.click();
+      }
+    };
+    document.addEventListener("keydown", listener);
+    return () => {
+      document.removeEventListener("keydown", listener);
+    };
+  }, []);
+
+
 
   return (
     <Container component="main" maxWidth="xs">
@@ -257,7 +271,6 @@ const Login = () => {
             onChange={(e) => {
               setUsername(e.target.value);
             }}
-            
           />
           <TextField
             variant="outlined"
@@ -290,6 +303,7 @@ const Login = () => {
             alertCallback={(message) => showAlert(message)}
             className={classes.submit}
             onClick={(event) => tryLogin(event)}
+            reference={submitButtonRef}
           />
         </form>
       </div>
