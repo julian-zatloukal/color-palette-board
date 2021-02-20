@@ -5,6 +5,8 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import Link from "@material-ui/core/Link";
+import Fab from "@material-ui/core/Fab";
+import AddIcon from "@material-ui/icons/Add";
 import { useTheme } from "@material-ui/core/styles";
 
 import Post from "../components/post/post";
@@ -42,11 +44,15 @@ export default function Index({ posts, userData }) {
   return (
     <React.Fragment>
       <CssBaseline />
-      <Navbar userData={userData}/>
+      <Navbar userData={userData} />
       <main>
         <Header />
+        
 
         <Container className={classes.cardGrid} maxWidth="md">
+        <Fab color="primary" aria-label="add">
+          <AddIcon />
+        </Fab>
           <Grid container spacing={4}>
             {posts.map((post, index) => (
               <Grid item key={index} xs={12} sm={6} md={4}>
@@ -72,31 +78,34 @@ export const getServerSideProps = async ({ req }) => {
 
   if (cookies["palette-board-token"]) {
     /* It's a registered user */
-    const fetchPosts = await (await fetch(`${apiEndpoint}posts`, {
-      method: 'GET',
-      headers: new Headers({
-        'Authorization': `Bearer ${cookies["palette-board-token"]}`, 
-      }), 
-    })).json();
+    const fetchPosts = await (
+      await fetch(`${apiEndpoint}posts`, {
+        method: "GET",
+        headers: new Headers({
+          Authorization: `Bearer ${cookies["palette-board-token"]}`,
+        }),
+      })
+    ).json();
     var posts = fetchPosts.data || [];
 
-    const fetchUserData = await (await fetch(`${apiEndpoint}verifyToken`, {
-      method: 'POST',
-      headers: new Headers({
-        'Authorization': `Bearer ${cookies["palette-board-token"]}`, 
-      }), 
-    })).json();
+    const fetchUserData = await (
+      await fetch(`${apiEndpoint}verifyToken`, {
+        method: "POST",
+        headers: new Headers({
+          Authorization: `Bearer ${cookies["palette-board-token"]}`,
+        }),
+      })
+    ).json();
     var userData = fetchUserData.data || [];
 
     return {
       props: {
         posts,
-        userData
+        userData,
       },
     };
-
   } else {
-    /* Show public version of the site */ 
+    /* Show public version of the site */
     const res = await (await fetch(`${apiEndpoint}posts`)).json();
     var posts = res.data || [];
     return {
