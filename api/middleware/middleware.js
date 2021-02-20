@@ -1,9 +1,14 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const cors = require("cors");
 
 module.exports = (app) => {
   console.log("Adding middleware");
+
+
+  // CORS
+  app.use(cors())
 
   // Body parser
   app.use(express.urlencoded({ extended: false }));

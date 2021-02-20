@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
@@ -8,32 +8,13 @@ import Link from "@material-ui/core/Link";
 import { useTheme } from "@material-ui/core/styles";
 
 import Post from "../components/post/post";
-import Navbar from "../components/navbar"
-
-
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {"Copyright © "}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+import Navbar from "../components/Navbar";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const useStyles = makeStyles((theme) => ({
   icon: {
     marginRight: "1rem",
-  },
-  heroContent: {
-    backgroundColor: theme.palette.background.paper,
-    padding: "1rem",
-  },
-  heroButtons: {
-    marginTop: "4rem",
   },
   cardGrid: {
     paddingTop: "3rem",
@@ -50,73 +31,66 @@ const useStyles = makeStyles((theme) => ({
   cardContent: {
     flexGrow: 1,
   },
-  footer: {
-    backgroundColor: theme.palette.background.paper,
-    padding: "3rem",
-  },
 }));
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-export default function Index() {
+export default function Index({ posts }) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
 
   return (
     <React.Fragment>
       <CssBaseline />
-      <Navbar/>
+      <Navbar />
       <main>
-        {/* Hero unit */}
-        <div className={classes.heroContent}>
-          <Container maxWidth="sm">
-            <Typography
-              component="h1"
-              variant="h2"
-              align="center"
-              color="textPrimary"
-              gutterBottom
-            >
-              Explore and share new colors
-            </Typography>
-            <Typography
-              variant="h5"
-              align="center"
-              color="textSecondary"
-              paragraph
-            >
-              Explore and share color palettes with Palette Board. Eye-catching
-              color compositions are waiting to be used in your projects.
-            </Typography>
-          </Container>
-        </div>
+        <Header />
+
         <Container className={classes.cardGrid} maxWidth="md">
-          {/* End hero unit */}
           <Grid container spacing={4}>
-            {cards.map((card) => (
-              <Grid item key={card} xs={12} sm={6} md={4}>
-                <Post />
+            {posts.map((post, index) => (
+              <Grid item key={index} xs={12} sm={6} md={4}>
+                <Post data={post} />
               </Grid>
             ))}
           </Grid>
         </Container>
       </main>
-      {/* Footer */}
-      <footer className={classes.footer}>
-        <Typography variant="h6" align="center" gutterBottom>
-          Footer
-        </Typography>
-        <Typography
-          variant="subtitle1"
-          align="center"
-          color="textSecondary"
-          component="p"
-        >
-          Something here to give the footer a purpose!
-        </Typography>
-        <Copyright />
-      </footer>
-      {/* End footer */}
+      <Footer />
     </React.Fragment>
   );
 }
+
+export const getServerSideProps = async ({ req }) => {
+  var cookies = {};
+  const apiEndpoint = process.env.API_DOCKER_ROOT_ENDPOINT;
+
+  req.headers.cookie.split(/\s*;\s*/).forEach(function (pair) {
+    pair = pair.split(/\s*=\s*/);
+    cookies[pair[0]] = pair.splice(1).join("=");
+  });
+
+  if (cookies["palette-board-token"]) {
+    const res = await (await fetch(`${apiEndpoint}posts`, {
+      method: 'GET',
+      headers: new Headers({
+        'Authorization': `Bearer ${cookies["palette-board-token"]}`, 
+      }), 
+    })).json();
+    var posts = res.data || [];
+    return {
+      props: {
+        posts,
+      },
+    };
+
+  } else {
+    const res = await (await fetch(`${apiEndpoint}posts`)).json();
+    var posts = res.data || [];
+    return {
+      props: {
+        posts,
+      },
+    };
+  }
+};

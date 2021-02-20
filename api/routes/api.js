@@ -1,12 +1,23 @@
 const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
-
-var User = require("../models/User");
-var Post = require("../models/Post");
-
 const base64url = require("base64url");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+
+const User = require("../models/User");
+const Post = require("../models/Post");
+
+const verifyToken = (req, res, next) => {
+  const bearerHeader = req.headers["authorization"];
+  if (typeof bearerHeader !== "undefined") {
+    req.token = bearerHeader.split(" ")[1];
+    next();
+  } else {
+    res.sendStatus(403);
+  }
+};
 
 // @desc    API root endpoint
 // @route   GET /api/
@@ -34,12 +45,10 @@ router.post("/users/register", async (req, res) => {
       });
     }
 
-    let computeHash = req.body.password;
-
     var newUser = new User({
       username: req.body.username,
       email: req.body.email,
-      passwordHash: computeHash,
+      passwordHash: bcrypt.hashSync(req.body.password, 10),
     });
 
     await newUser.save();
@@ -55,10 +64,19 @@ router.post("/users/register", async (req, res) => {
 
 // @desc    Create post
 // @route   POST /posts/create
-// @params  username, palette
-router.post("/posts/create", async (req, res) => {
+// @params  token, palette
+router.post("/posts/create", verifyToken, async (req, res) => {
   try {
-    let user = await User.findOne({ username: req.body.username }).exec();
+    if (!req.token) {
+      return res.status(200).json({
+        status: "ERR",
+        desc: `Token not found`,
+      });
+    }
+
+    let user = await User.findOne({
+      username: jwt.decode(req.token).username,
+    }).exec();
 
     if (!user) {
       return res.status(200).json({
@@ -98,14 +116,39 @@ router.post("/posts/create", async (req, res) => {
 // @route   GET /posts
 router.get("/posts", async (req, res) => {
   try {
+    const bearerHeader = req.headers["authorization"];
+    if (typeof bearerHeader !== "undefined") {
+      req.token = bearerHeader.split(" ")[1];
+    }
+
     let posts = await Post.find().lean().exec();
 
-
-    posts = await Promise.all( posts.map(  async (post) => {
+    posts = await Promise.all(
+      posts.map(async (post) => {
         let user = await User.findById(post.userId).exec();
-        return {...post, author: {username: user.username, profilePicure: ""}};
-    }));
 
+        if (req.token) {
+          return {
+            ...post,
+            author: { username: user.username, profilePicure: "" },
+            userLiked: post.likesInfo.users.includes(
+              String(
+                (
+                  await User.findOne({
+                    username: jwt.decode(req.token).username,
+                  })
+                )._id
+              )
+            ),
+          };
+        } else {
+          return {
+            ...post,
+            author: { username: user.username, profilePicure: "" },
+          };
+        }
+      })
+    );
 
     res.status(200).json({ status: "OK", data: posts });
   } catch (err) {
@@ -113,6 +156,85 @@ router.get("/posts", async (req, res) => {
       status: "ERR",
       desc: `Error retrieving all posts ${err.message}`,
     });
+  }
+});
+
+// @desc    Like a post
+// @route   POST /posts/like
+// @params  shortUUID, action
+router.post("/posts/like", verifyToken, async (req, res) => {
+  try {
+    let post = await Post.findOne({ shortUUID: req.body.shortUUID }).exec();
+    if (!post) throw new Error("Post not found");
+
+    let user = await User.findOne({
+      username: jwt.decode(req.token).username,
+    }).exec();
+    if (!user) throw new Error("User not found");
+
+    if (req.body.action === "like") {
+      if (post.likesInfo.users.includes(user._id))
+        throw new Error("User already liked the post");
+      post.likesInfo.users.push(user._id);
+      post.likesInfo.count = post.likesInfo.count + 1;
+    } else {
+      if (!post.likesInfo.users.includes(user._id))
+        throw new Error("User didn't like the post");
+      post.likesInfo.users.splice(post.likesInfo.users.indexOf(user._id), 1);
+      post.likesInfo.count = post.likesInfo.count - 1;
+    }
+
+    await post.save();
+    res.status(200).json({ status: "OK" });
+  } catch (err) {
+    res.status(200).json({
+      status: "ERR",
+      desc: `Error liking the post: ${err.message}`,
+    });
+  }
+});
+
+/**
+ * @desc Login user and generate token
+ */
+router.post("/login", async (req, res) => {
+  try {
+    let user = await User.findOne({ username: req.body.username });
+
+    if (!user) {
+      return res
+        .status(200)
+        .json({ status: "ERR", desc: "Username or password is incorrect" });
+    }
+
+    if (bcrypt.compareSync(req.body.password, user.passwordHash)) {
+      let token = jwt.sign(
+        { username: user.username },
+        process.env.JWT_SECRET_KEY
+      );
+
+      res.status(200).json({ status: "OK", token: token });
+    } else {
+      return res
+        .status(200)
+        .json({ status: "ERR", desc: "Username or password is incorrect" });
+    }
+  } catch (ex) {
+    res.status(200).json({ status: "ERR", desc: ex.message });
+  }
+});
+
+/**
+ * @desc Verify token
+ */
+router.post("/verifyToken", verifyToken, async (req, res) => {
+  try {
+    let payload = jwt.verify(req.token, process.env.JWT_SECRET_KEY);
+    if (payload) {
+      res.status(200).json({ status: "OK", data: payload });
+    }
+  } catch (ex) {
+    res.status(200).json({ status: "ERR", desc: ex.message });
   }
 });
 

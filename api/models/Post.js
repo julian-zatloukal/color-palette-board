@@ -17,9 +17,16 @@ var PostSchema = new Schema({
       type: String,
     },
   ],
-  Likes: {
-    type: Number,
-    default: 0,
+  likesInfo: {
+    count: {
+      type: Number,
+      default: 0,
+    },
+    users: [
+      {
+        type: String,
+      },
+    ]
   },
   createdAt: {
     type: Date,
