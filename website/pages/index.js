@@ -8,7 +8,9 @@ import Link from "@material-ui/core/Link";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import { useTheme } from "@material-ui/core/styles";
+import Dialog from '@material-ui/core/Dialog';
 
+import CreatePaletteDialog from "../components/createPalleteDialog/Dialog";
 import Post from "../components/post/post";
 import Navbar from "../components/Navbar";
 import Header from "../components/Header";
@@ -33,6 +35,9 @@ const useStyles = makeStyles((theme) => ({
   cardContent: {
     flexGrow: 1,
   },
+  dialogCard:{
+    overflow: 'unset'
+  }
 }));
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -41,18 +46,49 @@ export default function Index({ posts, userData }) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
 
+  const [openDialog, setOpenDialog] = React.useState(false);
+
+  const handleClickOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
   return (
     <React.Fragment>
       <CssBaseline />
+      <div style={{overflowY: 'unset'}}>
+        <Dialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          aria-labelledby="form-dialog-title"
+          fullWidth={true}
+        maxWidth={"sm"}
+        classes={{paper: classes.dialogCard}}
+        
+        >
+         <CreatePaletteDialog handleCloseDialog={handleCloseDialog}/>
+        </Dialog>
+      </div>
+
       <Navbar userData={userData} />
       <main>
         <Header />
-        
 
         <Container className={classes.cardGrid} maxWidth="md">
-        <Fab color="primary" aria-label="add">
-          <AddIcon />
-        </Fab>
+          <Fab
+            style={{ marginLeft: "0rem", marginBottom: "2rem" }}
+            variant="extended"
+            onClick={handleClickOpenDialog}
+            size="medium"
+            color="primary"
+            aria-label="add"
+          >
+            <AddIcon style={{ marginRight: "0.5rem" }} />
+            Add Palette
+          </Fab>
           <Grid container spacing={4}>
             {posts.map((post, index) => (
               <Grid item key={index} xs={12} sm={6} md={4}>
