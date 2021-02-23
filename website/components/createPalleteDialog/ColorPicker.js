@@ -7,78 +7,64 @@ import ColorLensIcon from "@material-ui/icons/ColorLens";
 import ColorizeIcon from "@material-ui/icons/Colorize";
 import Brightness5Icon from "@material-ui/icons/Brightness5";
 import Convert from "color-convert";
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from "react-redux";
+import {
+  updateColorBar,
+  addColorBar,
+  removeColorBar,
+  updateSelectedBarId,
+  updateIsOnChange,
+} from "./paletteDialogSlice";
 
 import ColorSlider from "./Slider";
 
-
 const useStyles = makeStyles((theme) => ({}));
 
-export default function Picker({ initialColor, updateColor }) {
+const rgbStringToHsl = (rgb) => {
+  let hsl = Convert.hex.hsl(rgb);
+  return {
+    hue: hsl[0],
+    saturation: hsl[1],
+    lightness: hsl[2],
+  };
+};
+
+const hslToRgbString = (hsl) => {
+  let rgb = Convert.hsl.hex(hsl.hue, hsl.saturation, hsl.lightness);
+  return `#${rgb}`;
+};
+
+export default function Picker() {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
   const [value, setValue] = useState(30);
-  const palette = useSelector(state => state.paletteDialog.palette);
+  const [hslValues, setHslValues] = useState(rgbStringToHsl("#000000"));
 
-  useEffect(() => {
-    console.log(palette);
-
-  }, [palette])
-
-
-
-  const rgbStringToHsl = (rgb) => {
-    // let hsl = Convert.rgb.hsl(
-    //   parseInt(rgb.substring(1, 3), 16),
-    //   parseInt(rgb.substring(3, 5), 16),
-    //   parseInt(rgb.substring(5), 16)
-    // );
-
-
-    let hsl = Convert.hex.hsl(rgb);
-
-    return {
-      hue: hsl[0],
-      saturation: hsl[1],
-      lightness: hsl[2],
-    };
-  };
-
-  const hslValues = useRef({
-    hue: 20,
-    saturation: 30,
-    lightness: 40,
-  });
-
-  const [hslValuesInitial, setHslValuesInitial] = useState(
-    rgbStringToHsl(initialColor)
+  const palette = useSelector((state) => state.paletteDialog.palette);
+  const isOnChange = useSelector((state) => state.paletteDialog.isOnChange);
+  const selectedBarId = useSelector(
+    (state) => state.paletteDialog.selectedBarId
   );
 
-  const handleSliderChange = (event, newValue) => {
-    setValue(newValue);
-  };
-
-  const handleInputChange = (event) => {
-    setValue(event.target.value === "" ? "" : Number(event.target.value));
-  };
-
-  const handleBlur = () => {
-    if (value < 0) {
-      setValue(0);
-    } else if (value > 100) {
-      setValue(100);
+  useEffect(() => {
+    if (typeof palette[0] !== "undefined") {
+      try {
+        let index = palette.findIndex((item) => item.id === selectedBarId);
+        setHslValues(rgbStringToHsl(palette[index].color));
+      } catch (ex) {}
     }
-  };
+  }, [isOnChange, selectedBarId]);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    setHslValuesInitial(rgbStringToHsl(initialColor));
-    console.log(rgbStringToHsl(initialColor))
-  }, [initialColor])
-  
-  // useEffect(() => {
-  //   console.log(hslValuesInitial)
-  // }, [hslValuesInitial])
-
+    dispatch(
+      updateColorBar({
+        id: selectedBarId,
+        color: hslToRgbString(hslValues),
+      })
+    );
+  }, [hslValues]);
 
   return (
     <Box
@@ -87,30 +73,30 @@ export default function Picker({ initialColor, updateColor }) {
     >
       <ColorSlider
         title="Hue"
+        parameter="hue"
         icon={<ColorLensIcon />}
-        initValue={hslValuesInitial.hue}
+        initValue={hslValues.hue}
         maxValue={360}
         updateValue={(hueValue) => {
-          hslValues.current.hue = hueValue;
-          updateColor(hslValues.current);
+          setHslValues({ ...hslValues, hue: hueValue });
         }}
       />
       <ColorSlider
         title="Saturation"
+        parameter="hue"
         icon={<ColorizeIcon />}
-        initValue={hslValuesInitial.saturation}
+        initValue={hslValues.saturation}
         updateValue={(satValue) => {
-          hslValues.current.saturation = satValue;
-          updateColor(hslValues.current);
+          setHslValues({ ...hslValues, saturation: satValue });
         }}
       />
       <ColorSlider
         title="Lightness"
+        parameter="hue"
         icon={<Brightness5Icon />}
-        initValue={hslValuesInitial.lightness}
+        initValue={hslValues.lightness}
         updateValue={(ligValue) => {
-          hslValues.current.lightness = ligValue;
-          updateColor(hslValues.current);
+          setHslValues({ ...hslValues, lightness: ligValue });
         }}
       />
     </Box>

@@ -12,15 +12,20 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Convert from "color-convert";
+import colorBarStyles from './ColorBar.module.css';
 
 import { useSelector, useDispatch } from "react-redux";
 import {
   updateColorBar,
   addColorBar,
   removeColorBar,
+  updateSelectedBarId,
+  updateIsOnChange,
+  updateAllColorBars
 } from "./paletteDialogSlice";
 
 import ColorPicker from "./ColorPicker";
+import SumbitButton from "./SubmitButton";
 
 const useStyles = makeStyles((theme) => ({
   dialogContent: {
@@ -60,19 +65,7 @@ const reorder = (list, startIndex, endIndex) => {
 
 const grid = 8;
 
-const getItemStyle = (isDragging, draggableStyle, color) => ({
-  // some basic styles to make the items look a bit nicer
-  userSelect: "none",
-  padding: grid * 2,
-  margin: `0 0 0 0`,
-  flexGrow: 1,
 
-  // change background colour if dragging
-  background: color,
-
-  // styles we need to apply on draggables
-  ...draggableStyle,
-});
 
 const getListStyle = (isDraggingOver) => ({
   background: "white",
@@ -86,15 +79,46 @@ export default function CreatePaletteDialog({ handleCloseDialog }) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
 
-  const [items, setItems] = useState(getItems(5));
+  const [items, setItems] = useState([]);
 
-  // const count = useSelector(state => state.counter.value);
   const dispatch = useDispatch();
-  const palette = useSelector(state => state.paletteDialog.palette);
+  const palette = useSelector((state) => state.paletteDialog.palette);
+  const selectedBarId = useSelector((state) => state.paletteDialog.selectedBarId);
+
+  const getItemStyle = (isDragging, draggableStyle, color, id) => ({
+    // some basic styles to make the items look a bit nicer
+    userSelect: "none",
+    padding: grid * 2,
+    margin: `0 0 0 0`,
+  
+    // change background colour if dragging
+    background: color,
+  
+    // styles we need to apply on draggables
+    ...draggableStyle,
+ });
+
+
 
   useEffect(() => {
+    setItems(palette);
+  }, [palette])
 
-
+  useEffect(() => {
+    if (palette.length === 0) {
+      Array(5)
+        .fill()
+        .forEach((v,i) => dispatch(addColorBar({
+          id: `bar-${i}`,
+          color: randomRgbColor()
+        })));
+    } else {
+      Array(palette.length)
+        .fill()
+        .forEach((v, i) =>
+          dispatch(updateColorBar({ id: `bar-${i}`, color: randomRgbColor() }))
+        );
+    }
   }, []);
 
   const onDragEnd = (result) => {
@@ -113,27 +137,19 @@ export default function CreatePaletteDialog({ handleCloseDialog }) {
     );
 
     setItems(orderedItems);
-  };
+    dispatch(updateAllColorBars(orderedItems));
+      
 
-  const [selectedColor, setSelectedColor] = useState(randomRgbColor());
-  const [selectedId, setSelectedId] = useState("item-0");
-
-  const updateColor = (color) => {
-    let rgb = `#${Convert.hsl.hex(
-      color.hue,
-      color.saturation,
-      color.lightness
-    )}`;
-    let newItems = Array.from(items);
-    let index = newItems.findIndex((item) => item.id === selectedId);
-    newItems[index].color = rgb;
-    setItems(newItems);
   };
 
   const onSelectBar = (itemId) => {
-    let index = items.findIndex((item) => item.id === itemId);
-    setSelectedId(itemId);
-    setSelectedColor(items[index].color);
+    if (selectedBarId===itemId){
+      dispatch(updateSelectedBarId(-1));
+    } else {
+      dispatch(updateSelectedBarId(itemId));
+      dispatch(updateIsOnChange(true));
+    }
+    
   };
 
   return (
@@ -162,13 +178,15 @@ export default function CreatePaletteDialog({ handleCloseDialog }) {
                       {(provided, snapshot) => (
                         <div
                           onClick={() => onSelectBar(item.id)}
+                          className={item.id===selectedBarId ? colorBarStyles.selectedColorBar : colorBarStyles.colorBar }
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           style={getItemStyle(
                             snapshot.isDragging,
                             provided.draggableProps.style,
-                            item.color
+                            item.color,
+                            item.id
                           )}
                         >
                           {/* {item.content} */}
@@ -183,18 +201,13 @@ export default function CreatePaletteDialog({ handleCloseDialog }) {
           </DragDropContext>
         </Box>
 
-        <ColorPicker
-          initialColor={selectedColor}
-          updateColor={(color) => updateColor(color)}
-        />
+        <ColorPicker/>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCloseDialog} color="primary">
           Cancel
         </Button>
-        <Button onClick={handleCloseDialog} color="primary">
-          Sumbit
-        </Button>
+        <SumbitButton callback={handleCloseDialog} />
       </DialogActions>
     </React.Fragment>
   );

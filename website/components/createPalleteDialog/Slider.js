@@ -6,34 +6,65 @@ import Box from "@material-ui/core/Box";
 import Input from "@material-ui/core/Input";
 import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
+import Convert from "color-convert";
 
-import useDidMountEffect from "../../utils/useDidMountEffect";
+
+
+import { useSelector, useDispatch } from "react-redux";
+import { updateFromHsl, updateIsOnChange } from "./paletteDialogSlice";
+
 import { useRef } from "react";
 
 const useStyles = makeStyles((theme) => ({}));
 
-export default function ColorSlider({ title, icon, maxValue=100, initValue, updateValue }) {
+const rgbStringToHsl = (rgb) => {
+  let hsl = Convert.hex.hsl(rgb);
+  return {
+    hue: hsl[0],
+    saturation: hsl[1],
+    lightness: hsl[2],
+  };
+};
+
+export default function ColorSlider({
+  title,
+  parameter,
+  icon,
+  maxValue = 100,
+  initValue,
+  updateValue,
+}) {
   var themeContext = useTheme();
+  const dispatch = useDispatch();
   const classes = useStyles(themeContext);
   const [value, setValue] = useState(initValue);
 
-  const isInitial = useRef(true);
+  const isOnChange = useSelector((state) => state.paletteDialog.isOnChange);
+  const selectedBarId = useSelector((state) => state.paletteDialog.selectedBarId);
+  const palette = useSelector((state) => state.paletteDialog.palette);
+
 
   useEffect(() => {
-    if (!isInitial.current){
-      updateValue(value);
-    } else {
-      isInitial.current = false;
+    console.log("click")
+    try{
+      let index = palette.findIndex(
+        (item) => item.id === selectedBarId
+      );
+      setValue(rgbStringToHsl(palette[index])[parameter]);
+    }catch(ex){
+      
     }
     
-  }, [value]);
+  }, [isOnChange]);
 
   useEffect(() => {
-    setValue(initValue);
-    isInitial.current = true;
-  }, [initValue]);
-
-
+    dispatch(
+      updateFromHsl({
+        parameter: parameter,
+        value: value,
+      })
+    );
+  }, [value]);
 
   const handleSliderChange = (event, newValue) => {
     setValue(newValue);

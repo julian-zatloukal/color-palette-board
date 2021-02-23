@@ -1,0 +1,9 @@
+.colorBar {
+    flex-grow: 1;
+    transition: flex-grow  0.5s;
+}
+
+.selectedColorBar {
+    flex-grow: 1.75;
+    transition: flex-grow 0.5s;
+}
