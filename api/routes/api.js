@@ -121,7 +121,7 @@ router.get("/posts", async (req, res) => {
       req.token = bearerHeader.split(" ")[1];
     }
 
-    let posts = await Post.find().lean().exec();
+    let posts = await Post.find().sort({createdAt: -1}).lean().exec();
 
     posts = await Promise.all(
       posts.map(async (post) => {

@@ -45,7 +45,6 @@ export default function ColorSlider({
 
 
   useEffect(() => {
-    console.log("click")
     try{
       let index = palette.findIndex(
         (item) => item.id === selectedBarId

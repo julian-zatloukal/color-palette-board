@@ -57,7 +57,7 @@ export const paletteDialogSlice = createSlice({
 
         state.palette[index].color = rgb;
       } catch (ex) {
-        console.log(ex)
+        // console.log(ex)
       }
     },
   },

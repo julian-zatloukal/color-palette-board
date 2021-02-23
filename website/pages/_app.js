@@ -1,14 +1,14 @@
 import React from "react";
-import PropTypes from "prop-types";
 import Head from "next/head";
 import { ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import theme from "../src/theme";
 import Link from "next/link";
 import { Provider } from "react-redux";
-import store from "../components/reduxStore";
+import store from "../components/utils/reduxStore";
+import GlobalAlert from "../components/utils/GlobalAlert";
 
-export default function MyApp(props) {
+export default function App(props) {
   const { Component, pageProps } = props;
 
   React.useEffect(() => {
@@ -53,14 +53,10 @@ export default function MyApp(props) {
         <Provider store={store}>
           {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
           <CssBaseline />
+          <GlobalAlert/>
           <Component {...pageProps} />
         </Provider>
       </ThemeProvider>
     </React.Fragment>
   );
 }
-
-MyApp.propTypes = {
-  Component: PropTypes.elementType.isRequired,
-  pageProps: PropTypes.object.isRequired,
-};

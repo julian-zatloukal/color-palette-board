@@ -1,9 +1,16 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
-import { useSelector, useDispatch } from "react-redux";
 import Cookies from "js-cookie";
 
+import { useDispatch, useSelector } from "react-redux";
+import {
+  openAlert,
+  updateAlertMessage,
+  sendAlert,
+} from "../utils/globalAlertSlice";
+
 export default function SubmitButton({ callback }) {
+  const dispatch = useDispatch();
   const palette = useSelector((state) => state.paletteDialog.palette);
 
   const submit = async () => {
@@ -25,6 +32,13 @@ export default function SubmitButton({ callback }) {
         }),
       })
     ).json();
+
+    dispatch(
+      sendAlert({
+        severity: "success",
+        message: "Post created successfully.",
+      })
+    );
 
     callback();
   };

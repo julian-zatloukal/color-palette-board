@@ -2,10 +2,12 @@ import React from "react";
 import { useRouter } from "next/router";
 import IndexPage from "../components/index/Page";
 
-export default function HomePage(props) {
+export default function PostPage(props) {
+  const router = useRouter();
+  const { shortUuid } = router.query;
   return (
     <div>
-      <IndexPage {...props}  />
+      <IndexPage {...props}  showPallete={'shortUuid'} />
     </div>
   );
 }

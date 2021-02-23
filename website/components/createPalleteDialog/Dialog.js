@@ -12,7 +12,7 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Convert from "color-convert";
-import colorBarStyles from './ColorBar.module.css';
+import colorBarStyles from "./ColorBar.module.css";
 
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -21,7 +21,7 @@ import {
   removeColorBar,
   updateSelectedBarId,
   updateIsOnChange,
-  updateAllColorBars
+  updateAllColorBars,
 } from "./paletteDialogSlice";
 
 import ColorPicker from "./ColorPicker";
@@ -65,8 +65,6 @@ const reorder = (list, startIndex, endIndex) => {
 
 const grid = 8;
 
-
-
 const getListStyle = (isDraggingOver) => ({
   background: "white",
   display: "flex",
@@ -75,7 +73,10 @@ const getListStyle = (isDraggingOver) => ({
   overflow: "auto",
 });
 
-export default function CreatePaletteDialog({ handleCloseDialog }) {
+export default function CreatePaletteDialog({
+  handleCloseDialog,
+  onSumbitPost,
+}) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
 
@@ -83,35 +84,39 @@ export default function CreatePaletteDialog({ handleCloseDialog }) {
 
   const dispatch = useDispatch();
   const palette = useSelector((state) => state.paletteDialog.palette);
-  const selectedBarId = useSelector((state) => state.paletteDialog.selectedBarId);
+  const selectedBarId = useSelector(
+    (state) => state.paletteDialog.selectedBarId
+  );
 
   const getItemStyle = (isDragging, draggableStyle, color, id) => ({
     // some basic styles to make the items look a bit nicer
     userSelect: "none",
     padding: grid * 2,
     margin: `0 0 0 0`,
-  
+
     // change background colour if dragging
     background: color,
-  
+
     // styles we need to apply on draggables
     ...draggableStyle,
- });
-
-
+  });
 
   useEffect(() => {
     setItems(palette);
-  }, [palette])
+  }, [palette]);
 
   useEffect(() => {
     if (palette.length === 0) {
       Array(5)
         .fill()
-        .forEach((v,i) => dispatch(addColorBar({
-          id: `bar-${i}`,
-          color: randomRgbColor()
-        })));
+        .forEach((v, i) =>
+          dispatch(
+            addColorBar({
+              id: `bar-${i}`,
+              color: randomRgbColor(),
+            })
+          )
+        );
     } else {
       Array(palette.length)
         .fill()
@@ -138,18 +143,15 @@ export default function CreatePaletteDialog({ handleCloseDialog }) {
 
     setItems(orderedItems);
     dispatch(updateAllColorBars(orderedItems));
-      
-
   };
 
   const onSelectBar = (itemId) => {
-    if (selectedBarId===itemId){
+    if (selectedBarId === itemId) {
       dispatch(updateSelectedBarId(-1));
     } else {
       dispatch(updateSelectedBarId(itemId));
       dispatch(updateIsOnChange(true));
     }
-    
   };
 
   return (
@@ -178,7 +180,11 @@ export default function CreatePaletteDialog({ handleCloseDialog }) {
                       {(provided, snapshot) => (
                         <div
                           onClick={() => onSelectBar(item.id)}
-                          className={item.id===selectedBarId ? colorBarStyles.selectedColorBar : colorBarStyles.colorBar }
+                          className={
+                            item.id === selectedBarId
+                              ? colorBarStyles.selectedColorBar
+                              : colorBarStyles.colorBar
+                          }
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
@@ -201,13 +207,18 @@ export default function CreatePaletteDialog({ handleCloseDialog }) {
           </DragDropContext>
         </Box>
 
-        <ColorPicker/>
+        <ColorPicker />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCloseDialog} color="primary">
           Cancel
         </Button>
-        <SumbitButton callback={handleCloseDialog} />
+        <SumbitButton
+          callback={() => {
+            handleCloseDialog();
+            onSumbitPost();
+          }}
+        />
       </DialogActions>
     </React.Fragment>
   );
