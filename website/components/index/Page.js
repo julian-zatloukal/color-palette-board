@@ -12,16 +12,14 @@ import Dialog from "@material-ui/core/Dialog";
 import Cookies from "js-cookie";
 
 import CreatePaletteDialog from "../createPalleteDialog/Dialog";
+import ShowPostDialog from "../postPage/ShowPostDialog";
 import Post from "../post/post";
 import Navbar from "../index/Navbar";
 import Header from "../index/Header";
 import Footer from "../index/Footer";
 
 import { useSelector, useDispatch } from "react-redux";
-import {
-  updateUserData,
-  updateIsUserLogged
-} from "../utils/userDataSlice";
+import { updateUserData, updateIsUserLogged } from "../utils/userDataSlice";
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -50,7 +48,6 @@ const useStyles = makeStyles((theme) => ({
 export default function IndexPage(Props) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
-  const [openDialog, setOpenDialog] = React.useState(false);
   const [posts, setPosts] = useState(Props.posts || []);
   const [userData, setUserData] = useState(Props.userData || null);
   const dispatch = useDispatch();
@@ -60,14 +57,24 @@ export default function IndexPage(Props) {
       dispatch(updateUserData(userData));
       dispatch(updateIsUserLogged(true));
     }
-  }, [userData])
+  }, [userData]);
 
-  const handleClickOpenDialog = () => {
-    setOpenDialog(true);
+  const [openCreatePaletteDialog, setOpenCreatePaletteDialog] = React.useState(
+    false
+  );
+  const handleClickOpenCreatePaletteDialog = () => {
+    setOpenCreatePaletteDialog(true);
+  };
+  const handleCloseCreatePaletteDialog = () => {
+    setOpenCreatePaletteDialog(false);
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
+  const [openShowPostDialog, setOpenShowPostDialog] = React.useState(true);
+  const handleClickOpenShowPostDialog = () => {
+    setOpenShowPostDialog(true);
+  };
+  const handleCloseShowPostDialog = () => {
+    setOpenShowPostDialog(false);
   };
 
   const refreshPosts = async () => {
@@ -112,21 +119,45 @@ export default function IndexPage(Props) {
     <React.Fragment>
       <CssBaseline />
 
-      <div>
-        <Dialog
-          open={openDialog}
-          onClose={handleCloseDialog}
-          aria-labelledby="form-dialog-title"
-          fullWidth={true}
-          maxWidth={"sm"}
-          classes={{ paper: classes.dialogCard }}
-        >
-          <CreatePaletteDialog
-            handleCloseDialog={handleCloseDialog}
-            onSumbitPost={refreshPosts}
-          />
-        </Dialog>
-      </div>
+      {userData ? (
+        <div>
+          <Dialog
+            open={openCreatePaletteDialog}
+            onClose={handleCloseCreatePaletteDialog}
+            aria-labelledby="form-dialog-title"
+            fullWidth={true}
+            maxWidth={"sm"}
+            classes={{ paper: classes.dialogCard }}
+          >
+            <CreatePaletteDialog
+              handleCloseDialog={handleCloseCreatePaletteDialog}
+              onSumbitPost={refreshPosts}
+            />
+          </Dialog>
+        </div>
+      ) : (
+        <div></div>
+      )}
+
+      {Props.paletteData ? (
+        <div>
+          <Dialog
+            open={openShowPostDialog}
+            onClose={handleCloseShowPostDialog}
+            aria-labelledby="form-dialog-title"
+            fullWidth={true}
+            maxWidth={"sm"}
+            classes={{ paper: classes.dialogCard }}
+          >
+            <ShowPostDialog
+              handleCloseDialog={handleCloseShowPostDialog}
+              paletteData={Props.paletteData}
+            />
+          </Dialog>
+        </div>
+      ) : (
+        <div></div>
+      )}
 
       <Navbar userData={userData} />
       <main>
@@ -137,7 +168,7 @@ export default function IndexPage(Props) {
             <Fab
               style={{ marginLeft: "0rem", marginBottom: "2rem" }}
               variant="extended"
-              onClick={handleClickOpenDialog}
+              onClick={handleClickOpenCreatePaletteDialog}
               size="medium"
               color="primary"
               aria-label="add"

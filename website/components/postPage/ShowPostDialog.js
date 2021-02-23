@@ -22,10 +22,7 @@ import {
   updateSelectedBarId,
   updateIsOnChange,
   updateAllColorBars,
-} from "./paletteDialogSlice";
-
-import ColorPicker from "./ColorPicker";
-import SumbitButton from "./SubmitButton";
+} from "../createPalleteDialog/paletteDialogSlice";
 
 const useStyles = makeStyles((theme) => ({
   dialogContent: {
@@ -36,17 +33,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const randomRgbColor = () => {
-  let rgb = Convert.hsl.hex(
-    Math.floor(Math.random() * Math.floor(360)),
-    60,
-    60
-  );
+const getItems = (count) =>
+  Array.from({ length: count }, (v, k) => k).map((k) => ({
+    id: `item-${k}`,
+    content: `item ${k}`,
+    color: randomRgbColor(),
+  }));
 
-  return `#${rgb}`;
-};
-
-// a little function to help us with reordering the result
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
@@ -65,20 +58,28 @@ const getListStyle = (isDraggingOver) => ({
   overflow: "auto",
 });
 
-export default function CreatePaletteDialog({
-  handleCloseDialog,
-  onSumbitPost,
-}) {
+export default function ShowPostDialog({ handleCloseDialog, paletteData }) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
-
-  const [items, setItems] = useState([]);
 
   const dispatch = useDispatch();
   const palette = useSelector((state) => state.paletteDialog.palette);
   const selectedBarId = useSelector(
     (state) => state.paletteDialog.selectedBarId
   );
+
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    paletteData.palette.forEach((v, i) =>
+      dispatch(
+        addColorBar({
+          id: `bar-${i}`,
+          color: v,
+        })
+      )
+    );
+  }, []);
 
   const getItemStyle = (isDragging, draggableStyle, color, id) => ({
     // some basic styles to make the items look a bit nicer
@@ -97,26 +98,26 @@ export default function CreatePaletteDialog({
     setItems(palette);
   }, [palette]);
 
-  useEffect(() => {
-    if (palette.length === 0) {
-      Array(5)
-        .fill()
-        .forEach((v, i) =>
-          dispatch(
-            addColorBar({
-              id: `bar-${i}`,
-              color: randomRgbColor(),
-            })
-          )
-        );
-    } else {
-      Array(palette.length)
-        .fill()
-        .forEach((v, i) =>
-          dispatch(updateColorBar({ id: `bar-${i}`, color: randomRgbColor() }))
-        );
-    }
-  }, []);
+  //   useEffect(() => {
+  //     if (palette.length === 0) {
+  //       Array(5)
+  //         .fill()
+  //         .forEach((v, i) =>
+  //           dispatch(
+  //             addColorBar({
+  //               id: `bar-${i}`,
+  //               color: randomRgbColor(),
+  //             })
+  //           )
+  //         );
+  //     } else {
+  //       Array(palette.length)
+  //         .fill()
+  //         .forEach((v, i) =>
+  //           dispatch(updateColorBar({ id: `bar-${i}`, color: randomRgbColor() }))
+  //         );
+  //     }
+  //   }, []);
 
   const onDragEnd = (result) => {
     if (!result.destination) {
@@ -198,19 +199,11 @@ export default function CreatePaletteDialog({
             </Droppable>
           </DragDropContext>
         </Box>
-
-        <ColorPicker />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCloseDialog} color="primary">
-          Cancel
+          OK
         </Button>
-        <SumbitButton
-          callback={() => {
-            handleCloseDialog();
-            onSumbitPost();
-          }}
-        />
       </DialogActions>
     </React.Fragment>
   );

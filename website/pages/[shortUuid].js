@@ -7,7 +7,9 @@ export default function PostPage(props) {
   const { shortUuid } = router.query;
   return (
     <div>
-      <IndexPage {...props}  showPallete={'shortUuid'} />
+      <IndexPage {...props}  paletteData={{
+          palette: ["#003049", "#D62828", "#F77F00", "#FCBF49", "#EAE2B7"]
+      }} />
     </div>
   );
 }
