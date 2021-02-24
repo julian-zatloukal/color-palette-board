@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function RecipeReviewCard({ data }) {
+export default function Post({ data }) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
   const [expanded, setExpanded] = React.useState(false);
@@ -144,6 +144,7 @@ export default function RecipeReviewCard({ data }) {
         isLiked={isLiked}
         isUserLogged={isUserLogged}
         handleLike={handleLike}
+        postData={data}
       />
     </Card>
   );

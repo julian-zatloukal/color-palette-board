@@ -7,21 +7,37 @@ export default function PostPage(props) {
   const { shortUuid } = router.query;
   return (
     <div>
-      <IndexPage {...props}  paletteData={{
-          palette: ["#003049", "#D62828", "#F77F00", "#FCBF49", "#EAE2B7"]
-      }} />
+      <IndexPage {...props} paletteData={props.sharedPostData} />
     </div>
   );
 }
 
-export const getServerSideProps = async ({ req }) => {
+export const getServerSideProps = async ({ req, query }) => {
   var cookies = {};
   const apiEndpoint = process.env.API_DOCKER_ROOT_ENDPOINT;
 
-  req.headers.cookie.split(/\s*;\s*/).forEach(function (pair) {
-    pair = pair.split(/\s*=\s*/);
-    cookies[pair[0]] = pair.splice(1).join("=");
-  });
+  const fetchSharedPost = await (
+    await fetch(`${apiEndpoint}posts/id`, {
+      method: "POST",
+      headers: new Headers({
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify({
+        shortUUID: query.shortUuid,
+      }),
+    })
+  ).json();
+  var sharedPostData = fetchSharedPost.data || [];
+
+  if (
+    Object.prototype.hasOwnProperty.call(req.headers, "cookie") &&
+    typeof req.headers.cookie === "string"
+  ) {
+    req.headers.cookie.split(/\s*;\s*/).forEach(function (pair) {
+      pair = pair.split(/\s*=\s*/);
+      cookies[pair[0]] = pair.splice(1).join("=");
+    });
+  }
 
   if (cookies["palette-board-token"]) {
     /* It's a registered user */
@@ -49,6 +65,7 @@ export const getServerSideProps = async ({ req }) => {
       props: {
         posts,
         userData,
+        sharedPostData,
       },
     };
   } else {
@@ -59,6 +76,7 @@ export const getServerSideProps = async ({ req }) => {
       props: {
         posts,
         userData: null,
+        sharedPostData,
       },
     };
   }

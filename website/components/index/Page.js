@@ -74,6 +74,7 @@ export default function IndexPage(Props) {
     setOpenShowPostDialog(true);
   };
   const handleCloseShowPostDialog = () => {
+    window.history.pushState("", "", "/");
     setOpenShowPostDialog(false);
   };
 

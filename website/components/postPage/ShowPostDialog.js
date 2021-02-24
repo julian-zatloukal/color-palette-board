@@ -71,14 +71,7 @@ export default function ShowPostDialog({ handleCloseDialog, paletteData }) {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    paletteData.palette.forEach((v, i) =>
-      dispatch(
-        addColorBar({
-          id: `bar-${i}`,
-          color: v,
-        })
-      )
-    );
+    dispatch(updateAllColorBars(paletteData.palette));
   }, []);
 
   const getItemStyle = (isDragging, draggableStyle, color, id) => ({
@@ -97,27 +90,6 @@ export default function ShowPostDialog({ handleCloseDialog, paletteData }) {
   useEffect(() => {
     setItems(palette);
   }, [palette]);
-
-  //   useEffect(() => {
-  //     if (palette.length === 0) {
-  //       Array(5)
-  //         .fill()
-  //         .forEach((v, i) =>
-  //           dispatch(
-  //             addColorBar({
-  //               id: `bar-${i}`,
-  //               color: randomRgbColor(),
-  //             })
-  //           )
-  //         );
-  //     } else {
-  //       Array(palette.length)
-  //         .fill()
-  //         .forEach((v, i) =>
-  //           dispatch(updateColorBar({ id: `bar-${i}`, color: randomRgbColor() }))
-  //         );
-  //     }
-  //   }, []);
 
   const onDragEnd = (result) => {
     if (!result.destination) {
@@ -149,12 +121,27 @@ export default function ShowPostDialog({ handleCloseDialog, paletteData }) {
 
   return (
     <React.Fragment>
-      <DialogTitle id="form-dialog-title">Create new color palette</DialogTitle>
+      <DialogTitle id="form-dialog-title">
+        <Box
+          component="div"
+          display="flex"
+          alignItems="flex-start"
+          flexDirection="column"
+        >
+          Post by {paletteData.author.username}{" "}
+          <Typography
+            style={{ marginLeft: "0rem" }}
+            variant="caption"
+            gutterBottom
+          >
+            ID: {paletteData.shortUUID}
+          </Typography>
+        </Box>
+      </DialogTitle>
       <DialogContent classes={{ root: classes.dialogContent }}>
-        <DialogContentText>
-          Add, change, and remove colors from the compositon. Drag and drop to
-          change the order of the colors.
-        </DialogContentText>
+        {/* <DialogContentText>
+          fdsdf
+        </DialogContentText> */}
         <Box component="div">
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="droppable" direction="horizontal">
@@ -201,7 +188,12 @@ export default function ShowPostDialog({ handleCloseDialog, paletteData }) {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCloseDialog} color="primary">
+        <Button
+          onClick={() => {
+            handleCloseDialog();
+          }}
+          color="primary"
+        >
           OK
         </Button>
       </DialogActions>

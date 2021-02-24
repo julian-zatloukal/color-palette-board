@@ -38,6 +38,7 @@ export default function PostActions({
   isLiked,
   likeCount,
   handleLike,
+  postData
 }) {
   const themeContext = useTheme();
   const classes = useStyles(themeContext);
@@ -69,7 +70,7 @@ export default function PostActions({
         </Typography>
       </Box>
 
-      <ShareMenu />
+      <ShareMenu postId={postData.shortUUID} />
     </CardActions>
   );
 }

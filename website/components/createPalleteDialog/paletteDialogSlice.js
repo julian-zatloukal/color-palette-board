@@ -18,8 +18,19 @@ export const paletteDialogSlice = createSlice({
       } catch (ex) {}
     },
     updateAllColorBars: (state, action) => {
-        state.palette = action.payload
-      },
+
+      if (Array.isArray(action.payload) && typeof(action.payload[0])==="string" ){
+        let temp = [];
+        action.payload.forEach((v, i) => {
+          temp.push({ color: v, id: `bar-${i}` });
+        });
+        state.palette = temp;
+      } else {
+        state.palette = action.payload;
+      }
+
+      
+    },
     addColorBar: (state, action) => {
       state.palette.push({
         id: action.payload.id,
@@ -45,15 +56,13 @@ export const paletteDialogSlice = createSlice({
 
         let rgb = "";
 
-        if (action.payload.parameter==='hue') {
+        if (action.payload.parameter === "hue") {
           rgb = `#${Convert.hsl.hex(action.payload.value, hsl[1], hsl[2])}`;
-        } else if (action.payload.parameter==='saturation') {
+        } else if (action.payload.parameter === "saturation") {
           rgb = `#${Convert.hsl.hex(hsl[0], action.payload.value, hsl[2])}`;
-        } else if (action.payload.parameter==='lightness') {
+        } else if (action.payload.parameter === "lightness") {
           rgb = `#${Convert.hsl.hex(hsl[0], hsl[1], action.payload.value)}`;
         }
-
-        
 
         state.palette[index].color = rgb;
       } catch (ex) {
@@ -71,7 +80,7 @@ export const {
   updateSelectedBarId,
   updateIsOnChange,
   updateAllColorBars,
-  updateFromHsl
+  updateFromHsl,
 } = paletteDialogSlice.actions;
 
 export default paletteDialogSlice.reducer;
