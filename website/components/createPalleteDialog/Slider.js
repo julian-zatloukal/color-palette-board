@@ -8,8 +8,6 @@ import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 import Convert from "color-convert";
 
-
-
 import { useSelector, useDispatch } from "react-redux";
 import { updateFromHsl, updateIsOnChange } from "./paletteDialogSlice";
 
@@ -31,30 +29,32 @@ export default function ColorSlider({
   parameter,
   icon,
   maxValue = 100,
-  initValue,
-  updateValue,
 }) {
   var themeContext = useTheme();
   const dispatch = useDispatch();
   const classes = useStyles(themeContext);
-  const [value, setValue] = useState(initValue);
+  const [value, setValue] = useState(0);
 
   const isOnChange = useSelector((state) => state.paletteDialog.isOnChange);
-  const selectedBarId = useSelector((state) => state.paletteDialog.selectedBarId);
+  const selectedBarId = useSelector(
+    (state) => state.paletteDialog.selectedBarId
+  );
   const palette = useSelector((state) => state.paletteDialog.palette);
 
-
   useEffect(() => {
-    try{
-      let index = palette.findIndex(
-        (item) => item.id === selectedBarId
-      );
-      setValue(rgbStringToHsl(palette[index])[parameter]);
-    }catch(ex){
-      
+    try {
+      let index = palette.findIndex((item) => item.id === selectedBarId);
+      if (index !== -1) {
+        setValue(
+          rgbStringToHsl(palette[index].color.toString().replace("#", ""))[
+            parameter
+          ]
+        );
+      }
+    } catch (ex) {
+      console.log(ex);
     }
-    
-  }, [isOnChange]);
+  }, [selectedBarId]);
 
   useEffect(() => {
     dispatch(

@@ -13,7 +13,6 @@ import Typography from "@material-ui/core/Typography";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Convert from "color-convert";
 import colorBarStyles from "./ColorBar.module.css";
-
 import { useSelector, useDispatch } from "react-redux";
 import {
   updateColorBar,
@@ -46,7 +45,6 @@ const randomRgbColor = () => {
   return `#${rgb}`;
 };
 
-// a little function to help us with reordering the result
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
@@ -81,15 +79,10 @@ export default function CreatePaletteDialog({
   );
 
   const getItemStyle = (isDragging, draggableStyle, color, id) => ({
-    // some basic styles to make the items look a bit nicer
     userSelect: "none",
     padding: grid * 2,
     margin: `0 0 0 0`,
-
-    // change background colour if dragging
     background: color,
-
-    // styles we need to apply on draggables
     ...draggableStyle,
   });
 
@@ -98,24 +91,11 @@ export default function CreatePaletteDialog({
   }, [palette]);
 
   useEffect(() => {
-    if (palette.length === 0) {
-      Array(5)
-        .fill()
-        .forEach((v, i) =>
-          dispatch(
-            addColorBar({
-              id: `bar-${i}`,
-              color: randomRgbColor(),
-            })
-          )
-        );
-    } else {
-      Array(palette.length)
-        .fill()
-        .forEach((v, i) =>
-          dispatch(updateColorBar({ id: `bar-${i}`, color: randomRgbColor() }))
-        );
-    }
+    let newPalette = Array(5)
+      .fill()
+      .reduce((acc, v, i) => acc.concat(randomRgbColor()), []);
+
+    dispatch(updateAllColorBars(newPalette));
   }, []);
 
   const onDragEnd = (result) => {
@@ -142,7 +122,6 @@ export default function CreatePaletteDialog({
       dispatch(updateSelectedBarId(-1));
     } else {
       dispatch(updateSelectedBarId(itemId));
-      dispatch(updateIsOnChange(true));
     }
   };
 
@@ -187,7 +166,7 @@ export default function CreatePaletteDialog({
                             item.id
                           )}
                         >
-                          {/* {item.content} */}
+                  
                         </div>
                       )}
                     </Draggable>

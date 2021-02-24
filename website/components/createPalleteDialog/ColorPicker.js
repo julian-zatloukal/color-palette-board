@@ -39,32 +39,12 @@ export default function Picker() {
   const classes = useStyles(themeContext);
   const [value, setValue] = useState(30);
   const [hslValues, setHslValues] = useState(rgbStringToHsl("#000000"));
-
+  const dispatch = useDispatch();
   const palette = useSelector((state) => state.paletteDialog.palette);
   const isOnChange = useSelector((state) => state.paletteDialog.isOnChange);
   const selectedBarId = useSelector(
     (state) => state.paletteDialog.selectedBarId
   );
-
-  useEffect(() => {
-    if (typeof palette[0] !== "undefined") {
-      try {
-        let index = palette.findIndex((item) => item.id === selectedBarId);
-        setHslValues(rgbStringToHsl(palette[index].color));
-      } catch (ex) {}
-    }
-  }, [isOnChange, selectedBarId]);
-
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(
-      updateColorBar({
-        id: selectedBarId,
-        color: hslToRgbString(hslValues),
-      })
-    );
-  }, [hslValues]);
 
   return (
     <Box
@@ -75,29 +55,17 @@ export default function Picker() {
         title="Hue"
         parameter="hue"
         icon={<ColorLensIcon />}
-        initValue={hslValues.hue}
         maxValue={360}
-        updateValue={(hueValue) => {
-          setHslValues({ ...hslValues, hue: hueValue });
-        }}
       />
       <ColorSlider
         title="Saturation"
-        parameter="hue"
+        parameter="saturation"
         icon={<ColorizeIcon />}
-        initValue={hslValues.saturation}
-        updateValue={(satValue) => {
-          setHslValues({ ...hslValues, saturation: satValue });
-        }}
       />
       <ColorSlider
         title="Lightness"
-        parameter="hue"
+        parameter="lightness"
         icon={<Brightness5Icon />}
-        initValue={hslValues.lightness}
-        updateValue={(ligValue) => {
-          setHslValues({ ...hslValues, lightness: ligValue });
-        }}
       />
     </Box>
   );
