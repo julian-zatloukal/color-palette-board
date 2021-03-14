@@ -12,7 +12,9 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Convert from "color-convert";
+import { TwitterPicker } from "react-color";
 import colorBarStyles from "./ColorBar.module.css";
+import dialogStyles from "./Dialog.module.css";
 import { useSelector, useDispatch } from "react-redux";
 import {
   updateColorBar,
@@ -58,7 +60,8 @@ const grid = 8;
 const getListStyle = (isDraggingOver) => ({
   background: "white",
   display: "flex",
-  padding: grid,
+  padding: 0,
+  paddingBottom: 8,
   height: "12rem",
   overflow: "auto",
 });
@@ -165,9 +168,7 @@ export default function CreatePaletteDialog({
                             item.color,
                             item.id
                           )}
-                        >
-                  
-                        </div>
+                        ></div>
                       )}
                     </Draggable>
                   ))}
@@ -178,7 +179,24 @@ export default function CreatePaletteDialog({
           </DragDropContext>
         </Box>
 
-        <ColorPicker />
+        <Box
+          component="div"
+          display="flex"
+          alignItems="center"
+          flexDirection="column"
+        >
+          {/* <Box alignSelf="flex-start" className={dialogStyles.colorSelector} >
+            <TwitterPicker
+              triangle="hide"
+              colors={Array(12)
+                .fill()
+                .reduce((acc, v, i) => acc.concat(randomRgbColor()), [])}
+            />
+          </Box> */}
+          <Box component="div" style={{ width: "100%" }}>
+            <ColorPicker />
+          </Box>
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCloseDialog} color="primary">

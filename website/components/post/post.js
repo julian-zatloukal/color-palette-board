@@ -16,12 +16,13 @@ import {
   closeAlert,
   updateAlertMessage,
   updateAlertSeverity,
-  sendAlert
+  sendAlert,
 } from "../utils/globalAlertSlice";
 
 import DotMenu from "./dotMenu";
 import Palette from "./Palette";
 import PostAction from "./PostActions";
+import { postLikeStatus } from "../utils/apiRequests";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -65,54 +66,23 @@ export default function Post({ data }) {
 
   const handleLike = async () => {
     if (isUserLogged) {
-      if (!isLiked) {
-        // Like the post
-        const res = await (
-          await fetch(
-            `${process.env.NEXT_PUBLIC_API_ROOT_ENDPOINT}posts/like`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${Cookies.get("palette-board-token")}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                shortUUID: data.shortUUID,
-                action: "like",
-              }),
-            }
-          )
-        ).json();
-
-        setLikeCount(likeCount + 1);
-        setIsLiked(true);
-      } else {
-        // Dislike the post
-        const res = await (
-          await fetch(
-            `${process.env.NEXT_PUBLIC_API_ROOT_ENDPOINT}posts/like`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${Cookies.get("palette-board-token")}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                shortUUID: data.shortUUID,
-                action: "dislike",
-              }),
-            }
-          )
-        ).json();
-
-        setLikeCount(likeCount - 1);
-        setIsLiked(false);
-      }
+      postLikeStatus(data.shortUUID, !isLiked).catch((error) => {
+        dispatch(
+          sendAlert({
+            severity: "error",
+            message: error.message,
+          })
+        );
+      });
+      setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+      setIsLiked(!isLiked);
     } else {
-      dispatch(sendAlert({
-        severity: 'error',
-        message: 'Please login in order to like a post.'
-      }));
+      dispatch(
+        sendAlert({
+          severity: "error",
+          message: "Please login in order to like a post.",
+        })
+      );
     }
   };
 

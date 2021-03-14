@@ -19,13 +19,13 @@ export const getServerSideProps = async ({ req }) => {
     cookies[pair[0]] = pair.splice(1).join("=");
   });
 
-  if (cookies["palette-board-token"]) {
+  if (cookies["user-token"]) {
     /* It's a registered user */
     const fetchPosts = await (
       await fetch(`${apiEndpoint}posts`, {
         method: "GET",
         headers: new Headers({
-          Authorization: `Bearer ${cookies["palette-board-token"]}`,
+          Authorization: `Bearer ${cookies["user-token"]}`,
         }),
       })
     ).json();
@@ -35,7 +35,7 @@ export const getServerSideProps = async ({ req }) => {
       await fetch(`${apiEndpoint}verifyToken`, {
         method: "POST",
         headers: new Headers({
-          Authorization: `Bearer ${cookies["palette-board-token"]}`,
+          Authorization: `Bearer ${cookies["user-token"]}`,
         }),
       })
     ).json();

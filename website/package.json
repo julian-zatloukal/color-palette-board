@@ -16,6 +16,7 @@
     "next": "latest",
     "react": "latest",
     "react-beautiful-dnd": "^13.0.0",
+    "react-color": "^2.19.3",
     "react-dom": "latest",
     "react-redux": "^7.2.2",
     "redux": "^4.0.5"

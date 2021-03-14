@@ -20,6 +20,7 @@ import Footer from "../index/Footer";
 
 import { useSelector, useDispatch } from "react-redux";
 import { updateUserData, updateIsUserLogged } from "../utils/userDataSlice";
+import { getAllPosts, getUserData } from "../utils/apiRequests";
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -35,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
   },
   cardMedia: {
-    paddingTop: "56.25%", // 16:9
+    paddingTop: "56.25%",
   },
   cardContent: {
     flexGrow: 1,
@@ -79,41 +80,17 @@ export default function IndexPage(Props) {
   };
 
   const refreshPosts = async () => {
-    let originUrl = process.env.NEXT_PUBLIC_API_ROOT_ENDPOINT
-      ? process.env.NEXT_PUBLIC_API_ROOT_ENDPOINT
-      : window.location.origin + "/api/";
+    getUserData()
+      .then((data) => {
+        setUserData(data);
+      })
+      .catch((error) => console.log(error.message));
 
-    if (Cookies.get("palette-board-token")) {
-      /* It's a registered user */
-      const fetchPosts = await (
-        await fetch(`${originUrl}posts`, {
-          method: "GET",
-          headers: new Headers({
-            Authorization: `Bearer ${Cookies.get("palette-board-token")}`,
-          }),
-        })
-      ).json();
-      var posts = fetchPosts.data || [];
-
-      const fetchUserData = await (
-        await fetch(`${originUrl}verifyToken`, {
-          method: "POST",
-          headers: new Headers({
-            Authorization: `Bearer ${Cookies.get("palette-board-token")}`,
-          }),
-        })
-      ).json();
-      var userData = fetchUserData.data || [];
-
-      setUserData(userData);
-      setPosts(posts);
-    } else {
-      /* Show public version of the site */
-      const res = await (await fetch(`${originUrl}posts`)).json();
-      var posts = res.data || [];
-
-      setPosts(posts);
-    }
+    getAllPosts()
+      .then((posts) => {
+        setPosts(posts);
+      })
+      .catch((error) => console.log(error.message));
   };
 
   return (

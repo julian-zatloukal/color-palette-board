@@ -8,39 +8,35 @@ import {
   updateAlertMessage,
   sendAlert,
 } from "../utils/globalAlertSlice";
+import { submitPost } from "../utils/apiRequests";
 
 export default function SubmitButton({ callback }) {
   const dispatch = useDispatch();
   const palette = useSelector((state) => state.paletteDialog.palette);
 
   const submit = async () => {
-    let rawPalette = palette.reduce((acc, v, i) => acc.concat(v.color), []);
+    let paletteData = palette.reduce((acc, v, i) => acc.concat(v.color), []);
 
-    let originUrl = process.env.NEXT_PUBLIC_API_ROOT_ENDPOINT
-      ? process.env.NEXT_PUBLIC_API_ROOT_ENDPOINT
-      : window.location.origin + "/api/";
-
-    const createPost = await (
-      await fetch(`${originUrl}posts/create`, {
-        method: "POST",
-        headers: new Headers({
-          Authorization: `Bearer ${Cookies.get("palette-board-token")}`,
-          "Content-Type": "application/json",
-        }),
-        body: JSON.stringify({
-          palette: rawPalette,
-        }),
+    submitPost(paletteData)
+      .then(() => {
+        dispatch(
+          sendAlert({
+            severity: "success",
+            message: "Post created successfully.",
+          })
+        );
       })
-    ).json();
-
-    dispatch(
-      sendAlert({
-        severity: "success",
-        message: "Post created successfully.",
+      .catch((error) => {
+        dispatch(
+          sendAlert({
+            severity: "error",
+            message: error.message,
+          })
+        );
       })
-    );
-
-    callback();
+      .finally(() => {
+        callback();
+      });
   };
 
   return (

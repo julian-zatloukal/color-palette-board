@@ -56,8 +56,7 @@ services:
 
 networks:
   app-network:
-    external:
-      name: nginx-network
+    driver: bridge
 
 volumes:
   db-data:
