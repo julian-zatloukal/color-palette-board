@@ -12,10 +12,10 @@ db.createUser({
   admin
   abc123
 
-  john
+  John
   coco123
 
-  catherine
+  Catherine
   green123
 */
 

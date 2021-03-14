@@ -11,13 +11,7 @@ import Cookies from "js-cookie";
 
 import { useSelector, useDispatch } from "react-redux";
 import { updateUserData } from "../utils/userDataSlice";
-import {
-  openAlert,
-  closeAlert,
-  updateAlertMessage,
-  updateAlertSeverity,
-  sendAlert,
-} from "../utils/globalAlertSlice";
+import { sendAlert } from "../utils/globalAlertSlice";
 
 import DotMenu from "./dotMenu";
 import Palette from "./Palette";
@@ -57,12 +51,16 @@ export default function Post({ data }) {
   const [likeCount, setLikeCount] = useState(data.likesInfo.count);
   const [isLiked, setIsLiked] = useState(data.userLiked);
   const isUserLogged = useSelector((state) => state.userData.isUserLogged);
+  const userData = useSelector((state) => state.userData.userData);
   const dispatch = useDispatch();
 
   useEffect(() => {
     setLikeCount(data.likesInfo.count);
     setIsLiked(data.userLiked);
   }, [data]);
+
+  const isCurrentUserAuthor = () =>
+    isUserLogged && data.author.username === userData.username;
 
   const handleLike = async () => {
     if (isUserLogged) {
@@ -102,7 +100,7 @@ export default function Post({ data }) {
             <Avatar src={data.author.profilePicture} />
           )
         }
-        action={<DotMenu />}
+        action={isCurrentUserAuthor() ? <DotMenu /> : <></>}
         title={data.author.username}
         subheader={moment.utc(data.createdAt).fromNow()}
       />

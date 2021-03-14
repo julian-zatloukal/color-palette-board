@@ -2,7 +2,7 @@ import React from "react";
 import IconButton from "@material-ui/core/IconButton";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import DeleteIcon from '@material-ui/icons/Delete';
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { useTheme } from "@material-ui/core/styles";
@@ -52,6 +52,10 @@ export default function DotMenu() {
     setAnchorEl(null);
   };
 
+  const deletePost = () => {
+    
+  }
+
   return (
     <div>
       <IconButton
@@ -71,7 +75,7 @@ export default function DotMenu() {
       >
         <MenuItem onClick={handleClose}>
             
-          <VisibilityOffIcon fontSize="small" className={classes.hideButton} /> Hide
+          <DeleteIcon fontSize="small" className={classes.hideButton}  onClick={deletePost} /> Delete
         </MenuItem>
       </StyledMenu>
     </div>

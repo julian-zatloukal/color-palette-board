@@ -39,6 +39,13 @@ router.use("/verifyToken", require("./verifyToken"));
 router.use("/posts/create", require("./postCreate"));
 
 /**
+ * @desc    Delete post
+ * @route   POST /posts/delete
+ * @params  headers.Authorization, shortUUID
+ */
+ router.use("/posts/delete", require("./postDelete"));
+
+/**
  * @desc    Get all posts
  * @route   GET /posts
  * @params  <empty>

@@ -29,7 +29,7 @@ export default function Navbar({ userData }) {
   const router = useRouter();
 
   const logout = () => {
-    Cookies.remove('palette-board-token');
+    Cookies.remove('user-token');
     router.reload();
   };
 
