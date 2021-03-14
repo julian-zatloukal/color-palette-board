@@ -106,7 +106,7 @@ const apiRequests = {
       let response = await fetch(`${apiRoot}posts/like`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${Cookies.get("user-token")}`,
+          Authorization: `Bearer ${getUserToken()}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -165,6 +165,38 @@ const apiRequests = {
       throw new Error("Couldn't submit post.");
     }
   },
+  deletePost: async (shortUuid) => {
+    var formattedResponse = {};
+    try {
+      let response = await fetch(`${apiRoot}posts/delete`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getUserToken()}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          shortUUID: shortUuid,
+        }),
+      });
+
+      if (response.ok) {
+        formattedResponse = await response.json();
+      } else {
+        throw Error("Couldn't delete post.");
+      }
+    } catch (ex) {
+      throw Error("Couldn't delete post.");
+    }
+
+    if (
+      Object.prototype.hasOwnProperty.call(formattedResponse, "status") &&
+      formattedResponse.status === "OK"
+    ) {
+      return true;
+    } else {
+      throw new Error("Couldn't delete post.");
+    }
+  }
 };
 
 export const {
@@ -173,4 +205,5 @@ export const {
   getUserData,
   postLikeStatus,
   submitPost,
+  deletePost,
 } = apiRequests;

@@ -2,11 +2,14 @@ import React from "react";
 import IconButton from "@material-ui/core/IconButton";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from "@material-ui/icons/Delete";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemIcon from "@material-ui/core/ListItemIcon";
 import { useTheme } from "@material-ui/core/styles";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
+import { deletePost } from "../utils/apiRequests";
+import { useSelector, useDispatch } from "react-redux";
+import { useRouter } from 'next/router'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -17,30 +20,26 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const StyledMenu = withStyles({})((props) => (
+  <Menu
+    elevation={0}
+    getContentAnchorEl={null}
+    anchorOrigin={{
+      vertical: "top",
+      horizontal: "right",
+    }}
+    transformOrigin={{
+      vertical: "top",
+      horizontal: "left",
+    }}
+    {...props}
+  />
+));
 
-const StyledMenu = withStyles({
-
-  })((props) => (
-    <Menu
-      elevation={0}
-      getContentAnchorEl={null}
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'left',
-      }}
-      {...props}
-    />
-  ));
-
-
-
-export default function DotMenu() {
+export default function DotMenu({ shortUuid }) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
+  const router = useRouter();
 
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -52,9 +51,21 @@ export default function DotMenu() {
     setAnchorEl(null);
   };
 
-  const deletePost = () => {
-    
-  }
+  const handleDeletePost = () => {
+    deletePost(shortUuid)
+      .then(() => {
+        handleClose();
+        router.reload();
+      })
+      .catch((error) => {
+        dispatch(
+          sendAlert({
+            severity: "error",
+            message: error.message,
+          })
+        );
+      });
+  };
 
   return (
     <div>
@@ -73,9 +84,9 @@ export default function DotMenu() {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleClose}>
-            
-          <DeleteIcon fontSize="small" className={classes.hideButton}  onClick={deletePost} /> Delete
+        <MenuItem onClick={handleDeletePost}>
+          <DeleteIcon fontSize="small" className={classes.hideButton} />
+          Delete
         </MenuItem>
       </StyledMenu>
     </div>

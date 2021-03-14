@@ -100,7 +100,7 @@ export default function Post({ data }) {
             <Avatar src={data.author.profilePicture} />
           )
         }
-        action={isCurrentUserAuthor() ? <DotMenu /> : <></>}
+        action={isCurrentUserAuthor() ? <DotMenu shortUuid={data.shortUUID}  /> : <></>}
         title={data.author.username}
         subheader={moment.utc(data.createdAt).fromNow()}
       />
