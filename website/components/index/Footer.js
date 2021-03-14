@@ -39,7 +39,7 @@ export default function Navbar() {
   return (
     <footer className={classes.footer}>
       <Typography variant="h6" align="center" gutterBottom>
-        Pallete board 
+        Palette board 
       </Typography>
       <Typography
         variant="subtitle1"
