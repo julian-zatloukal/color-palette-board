@@ -27,3 +27,11 @@ The project is about a website that allows registered users to post, like, and s
 
 ## Screenshots
 
+![Login](docs/images/login.png)
+![Register](docs/images/register.png)
+![Home](docs/images/home.png)
+![Home Logged In](docs/images/home-logged-in.png)
+![Home Create Palette](docs/images/home-create-palette.png)
+![Home Create Palette Drag](docs/images/home-create-palette-2.png)
+![Home URL Copied](docs/images/home-url-copied.png)
+![Home View Shared Palette](docs/images/home-view-shared-palette.png)
