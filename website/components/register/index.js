@@ -10,19 +10,13 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 
 
-import {
-  updateUsername,
-  updatePassword,
-  updateRememberUser,
-} from "./loginFormSlice";
 import usePersistedState, {
   getPersistedState,
 } from "../utils/usePersistedState";
-import LoginButton from "./LoginButton";
+import RegisterButton from "./RegisterButton";
 
 const Copyright = () => {
   return (
@@ -55,34 +49,25 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Login = () => {
+const Register = () => {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
-  const dispatch = useDispatch();
   const router = useRouter();
 
 
-  const username = useSelector((state) => state.loginForm.username);
-  const password = useSelector((state) => state.loginForm.password);
+  const defaultFieldData = {
+    value: "",
+    hasError: false,
+    errorMessage: ""
+  }
 
-  const [rememberUser, setRememberUser] = useState(false);
-  const usernameInputRef = useRef();
-  const passwordInputRef = useRef();
+  const [username, setUsername] = useState(defaultFieldData);
+  const [email, setEmail] = useState(defaultFieldData);
+  const [password, setPassword] = useState(defaultFieldData);
+  const [confirmPassword, setConfirmPassword] = useState(defaultFieldData);
+
+
   const submitButtonRef = useRef();
-
-  useEffect(() => {
-    if (getPersistedState("palette-board-remember-user", undefined)) {
-      dispatch(
-        updateUsername(getPersistedState("palette-board-remember-user", ""))
-      );
-      dispatch(updatePassword(""));
-      passwordInputRef.current.focus();
-    } else {
-      dispatch(updateUsername(""));
-      dispatch(updatePassword(""));
-      usernameInputRef.current.focus();
-    }
-  }, []);
 
   useEffect(() => {
     const listener = (event) => {
@@ -96,10 +81,6 @@ const Login = () => {
     };
   }, []);
 
-  useEffect(() => {
-    dispatch(updateRememberUser(rememberUser));
-  }, [rememberUser, dispatch]);
-
   return (
     <Container component="main" maxWidth="xs" className="mainContent">
       <CssBaseline />
@@ -108,7 +89,7 @@ const Login = () => {
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Login
+          Register
         </Typography>
         <form className={classes.form} noValidate>
           <TextField
@@ -120,10 +101,21 @@ const Login = () => {
             id="username"
             label="Username"
             name="username"
-            value={username.value}
-            inputRef={usernameInputRef}
             onChange={(e) => {
-              dispatch(updateUsername(e.target.value));
+              setUsername(Object.assign(username, {value: e.target.value}))
+            }}
+          />
+           <TextField
+            error={email.hasError}
+            helperText={email.errorMessage}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            id="email"
+            label="Email"
+            name="email"
+            onChange={(e) => {
+              setEmail(Object.assign(email, {value: e.target.value}))
             }}
           />
           <TextField
@@ -134,36 +126,38 @@ const Login = () => {
             fullWidth
             name="password"
             label="Password"
-            value={password.value}
-            inputRef={passwordInputRef}
             onChange={(e) => {
-              dispatch(updatePassword(e.target.value));
+              setPassword(Object.assign(password, {value: e.target.value}))
+
             }}
             type="password"
             id="password"
             autoComplete="current-password"
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                value="remember"
-                color="primary"
-                onChange={(e, isChecked, val) => {
-                  setRememberUser(isChecked);
-                }}
-              />
-            }
-            label="Remember User"
+           <TextField
+            error={confirmPassword.hasError}
+            helperText={confirmPassword.errorMessage}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            name="confirmPassword"
+            label="Confirm Password"
+            onChange={(e) => {
+              setConfirmPassword(Object.assign(confirmPassword, {value: e.target.value}))
+            }}
+            type="password"
+            id="confirmPassword"
+            autoComplete="current-password"
           />
-          <LoginButton reference={submitButtonRef} />
+         
+          <RegisterButton reference={submitButtonRef} />
           <Button
             style={{ width: "100%", marginTop: "1rem" }}
             variant="outlined"
             color="primary"
-            onClick={(e) => router.push('/register')}
-
+            onClick={(e) => router.push('/login')}
           >
-            Register
+            Login
           </Button>
         </form>
       </div>
@@ -174,4 +168,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

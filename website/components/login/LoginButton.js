@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect } from "react";
 import { useTheme, makeStyles } from "@material-ui/core/styles";
 import clsx from "clsx";
@@ -65,7 +64,7 @@ export default function LoginButton({ reference }) {
         dispatch(
           updateUsernameError({
             hasError: true,
-            errorMessage: "Ingrese su usuario.",
+            errorMessage: "Complete with your username.",
           })
         );
         return false;
@@ -84,7 +83,7 @@ export default function LoginButton({ reference }) {
         dispatch(
           updatePasswordError({
             hasError: true,
-            errorMessage: "Ingrese su contraseña.",
+            errorMessage: "Complete with your password.",
           })
         );
         return false;
@@ -169,7 +168,7 @@ export default function LoginButton({ reference }) {
           onClick={handleButtonClick}
           ref={reference}
         >
-          Ingresar
+          Login
         </Button>
         {loading && (
           <CircularProgress size={24} className={classes.buttonProgress} />

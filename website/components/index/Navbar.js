@@ -60,7 +60,7 @@ export default function Navbar({ userData }) {
             </Box>
           ) : (
             <Button color="inherit" onClick={() => router.push("/login")}>
-              Login
+              Login / Register
             </Button>
           )}
         </Toolbar>
