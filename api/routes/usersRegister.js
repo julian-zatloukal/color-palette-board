@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/User");
+var bcrypt = require('bcryptjs');
 
 // @desc    Register user
 // @route   POST /users/register

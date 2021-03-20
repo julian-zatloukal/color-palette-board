@@ -11,6 +11,37 @@ const debugLog = (log) => {
 };
 
 const apiRequests = {
+  register: async (username, email, password) => {
+    try {
+      let response = await fetch(apiRoot + "users/register", {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        redirect: "follow",
+        body: JSON.stringify({
+          username: username,
+          email: email,
+          password: password,
+        }),
+      });
+
+      if (response.ok) {
+        var formattedResponse = await response.json();
+      } else {
+        throw Error("Error produced while trying to register.");
+      }
+    } catch (ex) {
+      throw Error("Error produced while trying to register.");
+    }
+
+    if (formattedResponse.status === "OK") {
+      return formattedResponse;
+    } else {
+      throw new Error(formattedResponse.desc || "Error produced while trying to register.");
+    }
+  },
   login: async (username, password) => {
     try {
       let response = await fetch(apiRoot + "login", {
@@ -28,15 +59,17 @@ const apiRequests = {
 
       if (response.ok) {
         var formattedResponse = await response.json();
+      } else {
+        throw Error("Error produced while trying to login.");
       }
     } catch (ex) {
-      throw Error("Se ha producido un error.");
+      throw Error("Error produced while trying to login.");
     }
 
     if (formattedResponse.status === "OK") {
       return formattedResponse.token;
     } else {
-      throw new Error("Usuario o contraseña incorrectos.");
+      throw new Error("Incorrect user or password.");
     }
   },
   getAllPosts: async () => {
@@ -200,10 +233,12 @@ const apiRequests = {
 };
 
 export const {
+  register,
   login,
   getAllPosts,
   getUserData,
   postLikeStatus,
   submitPost,
   deletePost,
+  
 } = apiRequests;

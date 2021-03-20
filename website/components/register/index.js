@@ -12,11 +12,11 @@ import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import { useRouter } from "next/router";
 
-
 import usePersistedState, {
   getPersistedState,
 } from "../utils/usePersistedState";
 import RegisterButton from "./RegisterButton";
+import produce from "immer";
 
 const Copyright = () => {
   return (
@@ -54,18 +54,16 @@ const Register = () => {
   const classes = useStyles(themeContext);
   const router = useRouter();
 
-
   const defaultFieldData = {
     value: "",
     hasError: false,
-    errorMessage: ""
-  }
+    errorMessage: "",
+  };
 
   const [username, setUsername] = useState(defaultFieldData);
   const [email, setEmail] = useState(defaultFieldData);
   const [password, setPassword] = useState(defaultFieldData);
   const [confirmPassword, setConfirmPassword] = useState(defaultFieldData);
-
 
   const submitButtonRef = useRef();
 
@@ -91,7 +89,7 @@ const Register = () => {
         <Typography component="h1" variant="h5">
           Register
         </Typography>
-        <form className={classes.form} noValidate>
+        <form className={classes.form}>
           <TextField
             error={username.hasError}
             helperText={username.errorMessage}
@@ -102,10 +100,14 @@ const Register = () => {
             label="Username"
             name="username"
             onChange={(e) => {
-              setUsername(Object.assign(username, {value: e.target.value}))
+              setUsername(
+                produce(username, (draft) => {
+                  draft.value = e.target.value;
+                })
+              );
             }}
           />
-           <TextField
+          <TextField
             error={email.hasError}
             helperText={email.errorMessage}
             variant="outlined"
@@ -115,7 +117,11 @@ const Register = () => {
             label="Email"
             name="email"
             onChange={(e) => {
-              setEmail(Object.assign(email, {value: e.target.value}))
+              setEmail(
+                produce(email, (draft) => {
+                  draft.value = e.target.value;
+                })
+              );
             }}
           />
           <TextField
@@ -127,14 +133,17 @@ const Register = () => {
             name="password"
             label="Password"
             onChange={(e) => {
-              setPassword(Object.assign(password, {value: e.target.value}))
-
+              setPassword(
+                produce(password, (draft) => {
+                  draft.value = e.target.value;
+                })
+              );
             }}
             type="password"
             id="password"
             autoComplete="current-password"
           />
-           <TextField
+          <TextField
             error={confirmPassword.hasError}
             helperText={confirmPassword.errorMessage}
             variant="outlined"
@@ -143,19 +152,35 @@ const Register = () => {
             name="confirmPassword"
             label="Confirm Password"
             onChange={(e) => {
-              setConfirmPassword(Object.assign(confirmPassword, {value: e.target.value}))
+              setConfirmPassword(
+                produce(confirmPassword, (draft) => {
+                  draft.value = e.target.value;
+                })
+              );
             }}
             type="password"
             id="confirmPassword"
             autoComplete="current-password"
           />
-         
-          <RegisterButton reference={submitButtonRef} />
+
+          <RegisterButton
+            reference={submitButtonRef}
+            {...{
+              username,
+              setUsername,
+              email,
+              setEmail,
+              password,
+              setPassword,
+              confirmPassword,
+              setConfirmPassword,
+            }}
+          />
           <Button
             style={{ width: "100%", marginTop: "1rem" }}
             variant="outlined"
             color="primary"
-            onClick={(e) => router.push('/login')}
+            onClick={(e) => router.push("/login")}
           >
             Login
           </Button>

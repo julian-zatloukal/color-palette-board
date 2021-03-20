@@ -15,14 +15,7 @@ import Convert from "color-convert";
 import colorBarStyles from "./ColorBar.module.css";
 
 import { useSelector, useDispatch } from "react-redux";
-import {
-  updateColorBar,
-  addColorBar,
-  removeColorBar,
-  updateSelectedBarId,
-  updateIsOnChange,
-  updateAllColorBars,
-} from "../createPalleteDialog/paletteDialogSlice";
+
 
 const useStyles = makeStyles((theme) => ({
   dialogContent: {
@@ -63,16 +56,15 @@ export default function ShowPostDialog({ handleCloseDialog, paletteData }) {
   const classes = useStyles(themeContext);
 
   const dispatch = useDispatch();
-  const palette = useSelector((state) => state.paletteDialog.palette);
-  const selectedBarId = useSelector(
-    (state) => state.paletteDialog.selectedBarId
-  );
 
-  const [items, setItems] = useState([]);
+  const [palette, setPalette] = useState(paletteData.palette.reduce(
+    (acc, v, i) => acc.concat({ color: v, id: `bar-${i}` }),
+    []
+  ));
+  const [selectedBarId, setSelectedBarId] = useState(null);
+  const [currentColor, setCurrentColor] = useState("#000000");
 
-  useEffect(() => {
-    dispatch(updateAllColorBars(paletteData.palette));
-  }, []);
+
 
   const getItemStyle = (isDragging, draggableStyle, color, id) => ({
     // some basic styles to make the items look a bit nicer
@@ -87,9 +79,6 @@ export default function ShowPostDialog({ handleCloseDialog, paletteData }) {
     ...draggableStyle,
   });
 
-  useEffect(() => {
-    setItems(palette);
-  }, [palette]);
 
   const onDragEnd = (result) => {
     if (!result.destination) {
@@ -101,21 +90,20 @@ export default function ShowPostDialog({ handleCloseDialog, paletteData }) {
     }
 
     const orderedItems = reorder(
-      items,
+      palette,
       result.source.index,
       result.destination.index
     );
-
-    setItems(orderedItems);
-    dispatch(updateAllColorBars(orderedItems));
+    setPalette(orderedItems);
   };
 
   const onSelectBar = (itemId) => {
     if (selectedBarId === itemId) {
-      dispatch(updateSelectedBarId(-1));
+      setSelectedBarId(null);
     } else {
-      dispatch(updateSelectedBarId(itemId));
-      dispatch(updateIsOnChange(true));
+      setSelectedBarId(itemId);
+      let index = palette.findIndex((item) => item.id === itemId);
+      setCurrentColor(palette[index].color);
     }
   };
 
@@ -151,7 +139,7 @@ export default function ShowPostDialog({ handleCloseDialog, paletteData }) {
                   style={getListStyle(snapshot.isDraggingOver)}
                   {...provided.droppableProps}
                 >
-                  {items.map((item, index) => (
+                  {palette.map((item, index) => (
                     <Draggable
                       key={item.id}
                       draggableId={item.id}

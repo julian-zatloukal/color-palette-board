@@ -10,6 +10,7 @@
     "clipboard-polyfill": "^3.0.2",
     "clsx": "latest",
     "color-convert": "^1.9.3",
+    "email-validator": "^2.0.4",
     "immer": "^8.0.1",
     "js-cookie": "^2.2.1",
     "moment": "^2.29.1",

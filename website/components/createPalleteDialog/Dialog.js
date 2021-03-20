@@ -15,14 +15,6 @@ import Convert from "color-convert";
 import colorBarStyles from "./ColorBar.module.css";
 import dialogStyles from "./Dialog.module.css";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  updateColorBar,
-  addColorBar,
-  removeColorBar,
-  updateSelectedBarId,
-  updateIsOnChange,
-  updateAllColorBars,
-} from "./paletteDialogSlice";
 
 import ColorPicker from "./ColorPicker";
 import SumbitButton from "./SubmitButton";
@@ -119,9 +111,6 @@ export default function CreatePaletteDialog({
       result.source.index,
       result.destination.index
     );
-
-    console.log(orderedItems);
-
     setPalette(orderedItems);
   };
 

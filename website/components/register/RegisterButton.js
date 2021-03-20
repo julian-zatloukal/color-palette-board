@@ -1,15 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useTheme, makeStyles } from "@material-ui/core/styles";
 import clsx from "clsx";
 import { green } from "@material-ui/core/colors";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { useRouter } from "next/router";
+import Cookies from "js-cookie";
+import produce from "immer";
+import emailValidator from "email-validator";
 
 import { sendAlert } from "../utils/globalAlertSlice";
-
-import { login } from "../utils/apiRequests";
-import Cookies from "js-cookie";
+import { useDispatch, useSelector } from "react-redux";
+import { register, login } from "../utils/apiRequests";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,65 +37,142 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function RegisterButton({ reference }) {
+export default function RegisterButton({
+  reference,
+  username,
+  setUsername,
+  email,
+  setEmail,
+  password,
+  setPassword,
+  confirmPassword,
+  setConfirmPassword,
+}) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
   const router = useRouter();
+  const dispatch = useDispatch();
+  const [autoValidate, setAutoValidate] = useState(false);
 
-  // const validateInput = {
-  //   all: () => {
-  //     let usernameError = validateInput.username(username.value);
-  //     let passwordError = validateInput.password(password.value);
-  //     return usernameError && passwordError;
-  //   },
-  //   username: (username) => {
-  //     if (username === "") {
-  //       dispatch(
-  //         updateUsernameError({
-  //           hasError: true,
-  //           errorMessage: "Complete with your username.",
-  //         })
-  //       );
-  //       return false;
-  //     }
+  const validateInput = {
+    all: () => {
+      return ![
+        validateInput.username(),
+        validateInput.email(),
+        validateInput.password(),
+        validateInput.confirmPassword(),
+      ].includes(false);
+    },
+    username: () => {
+      if (username.value === "") {
+        setUsername(
+          produce(username, (draft) => {
+            draft.hasError = true;
+            draft.errorMessage = "Complete with your username.";
+          })
+        );
+        return false;
+      }
 
-  //     dispatch(
-  //       updateUsernameError({
-  //         hasError: false,
-  //         errorMessage: "",
-  //       })
-  //     );
-  //     return true;
-  //   },
-  //   password: (password) => {
-  //     if (password === "") {
-  //       dispatch(
-  //         updatePasswordError({
-  //           hasError: true,
-  //           errorMessage: "Complete with your password.",
-  //         })
-  //       );
-  //       return false;
-  //     }
+      setUsername(
+        produce(username, (draft) => {
+          draft.hasError = false;
+          draft.errorMessage = "";
+        })
+      );
+      return true;
+    },
+    email: () => {
+      if (email.value === "") {
+        setEmail(
+          produce(email, (draft) => {
+            draft.hasError = true;
+            draft.errorMessage = "Complete with your email.";
+          })
+        );
+        return false;
+      } else if (!emailValidator.validate(email.value)) {
+        setEmail(
+          produce(email, (draft) => {
+            draft.hasError = true;
+            draft.errorMessage = "Invalid email address.";
+          })
+        );
+        return false;
+      }
 
-  //     dispatch(
-  //       updatePasswordError({
-  //         hasError: false,
-  //         errorMessage: "",
-  //       })
-  //     );
+      setEmail(
+        produce(email, (draft) => {
+          draft.hasError = false;
+          draft.errorMessage = "";
+        })
+      );
 
-  //     return true;
-  //   },
-  // };
+      return true;
+    },
+    password: () => {
+      if (password.value === "") {
+        setPassword(
+          produce(password, (draft) => {
+            draft.hasError = true;
+            draft.errorMessage = "Complete with your password.";
+          })
+        );
+        return false;
+      }
 
-  // useEffect(() => {
-  //   if (autoValidate) validateInput.username(username.value);
-  // }, [username, validateInput]);
+      setPassword(
+        produce(password, (draft) => {
+          draft.hasError = false;
+          draft.errorMessage = "";
+        })
+      );
+      return true;
+    },
+    confirmPassword: () => {
+      if (confirmPassword.value === "") {
+        setConfirmPassword(
+          produce(confirmPassword, (draft) => {
+            draft.hasError = true;
+            draft.errorMessage = "Complete with your password again.";
+          })
+        );
+        return false;
+      } else if (confirmPassword.value !== password.value) {
+        setConfirmPassword(
+          produce(confirmPassword, (draft) => {
+            draft.hasError = true;
+            draft.errorMessage = "Password confirmation doesn't match.";
+          })
+        );
+        return false;
+      }
 
-  // useEffect(() => {
-  //   if (autoValidate) validateInput.password(password.value);
-  // }, [password, validateInput]);
+      setConfirmPassword(
+        produce(confirmPassword, (draft) => {
+          draft.hasError = false;
+          draft.errorMessage = "";
+        })
+      );
+      return true;
+    },
+  };
+
+  useEffect(() => {
+    if (autoValidate) validateInput.username();
+  }, [username, validateInput]);
+
+  useEffect(() => {
+    if (autoValidate) validateInput.email();
+  }, [email, validateInput]);
+
+  useEffect(() => {
+    if (autoValidate) validateInput.password();
+  }, [password, validateInput]);
+
+  useEffect(() => {
+    if (autoValidate) validateInput.confirmPassword();
+  }, [confirmPassword, validateInput]);
 
   const [loading, setLoading] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
@@ -103,40 +182,34 @@ export default function RegisterButton({ reference }) {
   });
 
   const handleButtonClick = () => {
-    // setAutoValidate(true);
-    // if (validateInput.all() && !loading) {
-    //   setSuccess(false);
-    //   setLoading(true);
+    setAutoValidate(true);
+    if (validateInput.all() && !loading) {
+      setSuccess(false);
+      setLoading(true);
+      register(username.value, email.value, password.value)
+        .then((token) => {
+          login(username.value, password.value)
+            .then((token) => {
+              Cookies.set("user-token", token);
 
-    //   login(username.value, password.value)
-    //     .then((token) => {
-    //       setSuccess(true);
-    //       setLoading(false);
-
-    //       Cookies.set("user-token", token);
-
-    //       if (rememberUser) {
-    //         localStorage.setItem(
-    //           "remember-user",
-    //           JSON.stringify(username.value)
-    //         );
-    //       } else {
-    //         localStorage.removeItem("remember-user");
-    //       }
-
-    //       router.push("/");
-    //     })
-    //     .catch((err) => {
-    //       setSuccess(false);
-    //       setLoading(false);
-    //       dispatch(
-    //         sendAlert({
-    //           message: err.message,
-    //           severity: "error",
-    //         })
-    //       );
-    //     });
-    // }
+              router.push("/");
+            })
+            .finally(() => {
+              setSuccess(true);
+              setLoading(false);
+            });
+        })
+        .catch((err) => {
+          setSuccess(false);
+          setLoading(false);
+          dispatch(
+            sendAlert({
+              message: err.message,
+              severity: "error",
+            })
+          );
+        });
+    }
   };
 
   return (
