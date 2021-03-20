@@ -10,9 +10,8 @@ import {
 } from "../utils/globalAlertSlice";
 import { submitPost } from "../utils/apiRequests";
 
-export default function SubmitButton({ callback }) {
+export default function SubmitButton({ callback, palette }) {
   const dispatch = useDispatch();
-  const palette = useSelector((state) => state.paletteDialog.palette);
 
   const submit = async () => {
     let paletteData = palette.reduce((acc, v, i) => acc.concat(v.color), []);

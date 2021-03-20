@@ -15,58 +15,90 @@ import {
   updateSelectedBarId,
   updateIsOnChange,
 } from "./paletteDialogSlice";
+import { BlockPicker, SliderPicker } from "react-color";
 
-import ColorSlider from "./Slider";
+const randomRgbColor = () => {
+  let rgb = Convert.hsl.hex(
+    Math.floor(Math.random() * Math.floor(360)),
+    60,
+    60
+  );
 
-const useStyles = makeStyles((theme) => ({}));
-
-const rgbStringToHsl = (rgb) => {
-  let hsl = Convert.hex.hsl(rgb);
-  return {
-    hue: hsl[0],
-    saturation: hsl[1],
-    lightness: hsl[2],
-  };
-};
-
-const hslToRgbString = (hsl) => {
-  let rgb = Convert.hsl.hex(hsl.hue, hsl.saturation, hsl.lightness);
   return `#${rgb}`;
 };
 
-export default function Picker() {
+const useStyles = makeStyles((theme) => ({
+  container: {
+    marginTop: "0.5rem",
+    display: "flex",
+
+    [theme.breakpoints.down("md")]: {
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    [theme.breakpoints.up("md")]: {
+      flexDirection: "row",
+      justifyContent: "flex-start",
+      alignItems: "flex-start",
+    },
+  },
+}));
+
+export default function Picker({ color, onColorChange }) {
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
-  const [value, setValue] = useState(30);
-  const [hslValues, setHslValues] = useState(rgbStringToHsl("#000000"));
   const dispatch = useDispatch();
-  const palette = useSelector((state) => state.paletteDialog.palette);
-  const isOnChange = useSelector((state) => state.paletteDialog.isOnChange);
-  const selectedBarId = useSelector(
-    (state) => state.paletteDialog.selectedBarId
+
+  const [colorSwatch, setColorSwatch] = useState(
+    Array(12)
+      .fill()
+      .reduce((acc, v, i) => {
+        let randomColor = randomRgbColor();
+        while (acc.includes(randomColor)) randomColor = randomRgbColor();
+        return acc.concat(randomColor);
+      }, [])
   );
 
+  // const onColorChangeHandle = (color) => {
+  //   onColorChange(color);
+  // };
+
+  const [internalColor, setInternalColor] = useState(color);
+
+  useEffect(() => {
+    
+    setInternalColor(color);
+  }, [color])
+
   return (
-    <Box
-      component="div"
-      style={{ marginLeft: "2rem", marginRight: "2rem", marginTop: "2rem" }}
-    >
-      <ColorSlider
-        title="Hue"
-        parameter="hue"
-        icon={<ColorLensIcon />}
-        maxValue={360}
-      />
-      <ColorSlider
-        title="Saturation"
-        parameter="saturation"
-        icon={<ColorizeIcon />}
-      />
-      <ColorSlider
-        title="Lightness"
-        parameter="lightness"
-        icon={<Brightness5Icon />}
-      />
+    <Box component="div" className={classes.container}>
+      <Box
+        style={{
+          marginRight: "1rem",
+          userSelect: "none",
+          WebkitUserSelect: "none",
+          MozUserSelect: "none",
+          msUserSelect: "none",
+        }}
+      >
+        <BlockPicker
+          triangle="hide"
+          color={color}
+          colors={colorSwatch}
+          onChangeComplete={(color, event) => onColorChange(color.hex)}
+        />
+      </Box>
+      <Box
+        component="div"
+        style={{ width: "100%", marginTop: "2rem", position: "relative" }}
+      >
+        <SliderPicker
+          color={internalColor}
+          onChange={(result, event) => setInternalColor(result.hex)}
+          onChangeComplete={(result, event) => onColorChange(result.hex)}
+        />
+      </Box>
     </Box>
   );
 }

@@ -12,7 +12,6 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Convert from "color-convert";
-import { TwitterPicker } from "react-color";
 import colorBarStyles from "./ColorBar.module.css";
 import dialogStyles from "./Dialog.module.css";
 import { useSelector, useDispatch } from "react-redux";
@@ -27,10 +26,11 @@ import {
 
 import ColorPicker from "./ColorPicker";
 import SumbitButton from "./SubmitButton";
+import produce from "immer";
 
 const useStyles = makeStyles((theme) => ({
   dialogContent: {
-    overflowY: "unset",
+    overflowY: "clip",
   },
   input: {
     width: 42,
@@ -73,13 +73,17 @@ export default function CreatePaletteDialog({
   var themeContext = useTheme();
   const classes = useStyles(themeContext);
 
-  const [items, setItems] = useState([]);
+  // const [items, setItems] = useState([]);
 
   const dispatch = useDispatch();
-  const palette = useSelector((state) => state.paletteDialog.palette);
-  const selectedBarId = useSelector(
-    (state) => state.paletteDialog.selectedBarId
-  );
+  // const palette = useSelector((state) => state.paletteDialog.palette);
+  // const selectedBarId = useSelector(
+  //   (state) => state.paletteDialog.selectedBarId
+  // );
+
+  const [palette, setPalette] = useState([]);
+  const [selectedBarId, setSelectedBarId] = useState(null);
+  const [currentColor, setCurrentColor] = useState("#000000");
 
   const getItemStyle = (isDragging, draggableStyle, color, id) => ({
     userSelect: "none",
@@ -90,15 +94,15 @@ export default function CreatePaletteDialog({
   });
 
   useEffect(() => {
-    setItems(palette);
-  }, [palette]);
-
-  useEffect(() => {
     let newPalette = Array(5)
       .fill()
-      .reduce((acc, v, i) => acc.concat(randomRgbColor()), []);
+      .reduce(
+        (acc, v, i) => acc.concat({ color: randomRgbColor(), id: `bar-${i}` }),
+        []
+      );
 
-    dispatch(updateAllColorBars(newPalette));
+    setPalette(newPalette);
+    setCurrentColor(newPalette[0].color);
   }, []);
 
   const onDragEnd = (result) => {
@@ -111,22 +115,40 @@ export default function CreatePaletteDialog({
     }
 
     const orderedItems = reorder(
-      items,
+      palette,
       result.source.index,
       result.destination.index
     );
 
-    setItems(orderedItems);
-    dispatch(updateAllColorBars(orderedItems));
+    console.log(orderedItems);
+
+    setPalette(orderedItems);
   };
 
   const onSelectBar = (itemId) => {
     if (selectedBarId === itemId) {
-      dispatch(updateSelectedBarId(-1));
+      setSelectedBarId(null);
     } else {
-      dispatch(updateSelectedBarId(itemId));
+      setSelectedBarId(itemId);
+      let index = palette.findIndex((item) => item.id === itemId);
+      setCurrentColor(palette[index].color);
     }
   };
+
+  const onColorChange = (color) => {
+    setCurrentColor(color);
+  };
+
+  useEffect(() => {
+    if (selectedBarId) {
+      let index = palette.findIndex((item) => item.id === selectedBarId);
+      setPalette(
+        produce(palette, (draft) => {
+          draft[index].color = currentColor;
+        })
+      );
+    }
+  }, [currentColor]);
 
   return (
     <React.Fragment>
@@ -145,7 +167,7 @@ export default function CreatePaletteDialog({
                   style={getListStyle(snapshot.isDraggingOver)}
                   {...provided.droppableProps}
                 >
-                  {items.map((item, index) => (
+                  {palette.map((item, index) => (
                     <Draggable
                       key={item.id}
                       draggableId={item.id}
@@ -179,30 +201,14 @@ export default function CreatePaletteDialog({
           </DragDropContext>
         </Box>
 
-        <Box
-          component="div"
-          display="flex"
-          alignItems="center"
-          flexDirection="column"
-        >
-          {/* <Box alignSelf="flex-start" className={dialogStyles.colorSelector} >
-            <TwitterPicker
-              triangle="hide"
-              colors={Array(12)
-                .fill()
-                .reduce((acc, v, i) => acc.concat(randomRgbColor()), [])}
-            />
-          </Box> */}
-          <Box component="div" style={{ width: "100%" }}>
-            <ColorPicker />
-          </Box>
-        </Box>
+        <ColorPicker color={currentColor} onColorChange={onColorChange} />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCloseDialog} color="primary">
           Cancel
         </Button>
         <SumbitButton
+          palette={palette}
           callback={() => {
             handleCloseDialog();
             onSumbitPost();
