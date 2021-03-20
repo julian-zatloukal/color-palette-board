@@ -45,8 +45,6 @@ cd api/
 docker-compose up --build
 ```
 
-
-
 ## Screenshots
 
 ![Login](docs/images/login.png)

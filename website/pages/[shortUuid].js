@@ -1,6 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
 import IndexPage from "../components/index/Page";
+import getConfig from 'next/config'
 
 export default function PostPage(props) {
   const router = useRouter();
@@ -13,8 +14,10 @@ export default function PostPage(props) {
 }
 
 export const getServerSideProps = async ({ req, query }) => {
+  const { serverRuntimeConfig } = getConfig()
+
   var cookies = {};
-  const apiEndpoint = process.env.API_DOCKER_ROOT_ENDPOINT;
+  const apiEndpoint = serverRuntimeConfig.apiEndpoint;
 
   const fetchSharedPost = await (
     await fetch(`${apiEndpoint}posts/id`, {
