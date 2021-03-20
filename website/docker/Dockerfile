@@ -1,23 +1,49 @@
-FROM node:15.6.0-alpine
+# Install dependencies only when needed
+FROM node:alpine AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
 
-# Install bash due to alpine based image
+# Rebuild the source code only when needed
+FROM node:alpine AS builder
+WORKDIR /app
+COPY . .
+COPY --from=deps /app/node_modules ./node_modules
+RUN npm run build
+
+# Production image, copy all the files and run next
+FROM node:alpine AS runner
+WORKDIR /app
+
 RUN apk add --update bash
 
+ENV NODE_ENV production
 
-# Create app directory
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
 
-# Installing dependencies
-COPY package*.json /usr/src/app/
-RUN npm install
+# You only need to copy next.config.js if you are NOT using the default configuration
+COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/docker ./docker
+COPY --from=builder /app/.env ./.env
 
-# Copying source files
-COPY . /usr/src/app
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+RUN chown -R nextjs:nodejs /app/.next
+USER nextjs
 
-# Building app
-RUN npm run build
 EXPOSE 3000
 
-# Running the app
-ENTRYPOINT ["sh", "./docker/start-docker.sh"]
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry.
+# RUN npx next telemetry disable
+
+RUN ls
+
+ENTRYPOINT ["sh", "/app/docker/start-docker.sh"]
+
+# CMD ["node_modules/.bin/next", "start"]

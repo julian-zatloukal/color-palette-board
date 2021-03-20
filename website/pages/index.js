@@ -1,6 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
 import IndexPage from "../components/index/Page";
+import getConfig from 'next/config'
 
 export default function HomePage(props) {
   return (
@@ -11,8 +12,11 @@ export default function HomePage(props) {
 }
 
 export const getServerSideProps = async ({ req }) => {
+
+  const { serverRuntimeConfig } = getConfig()
+
   var cookies = {};
-  const apiEndpoint = process.env.API_DOCKER_ROOT_ENDPOINT;
+  const apiEndpoint = serverRuntimeConfig.apiEndpoint;
 
   if (Object.prototype.hasOwnProperty.call(req.headers, "cookie")) {
     req.headers.cookie.split(/\s*;\s*/).forEach(function (pair) {

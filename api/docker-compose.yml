@@ -42,8 +42,6 @@ services:
       dockerfile: ./docker/Dockerfile
     volumes:
       - ../website:/usr/src/app
-      # - /usr/src/app/node_modules
-      - /usr/src/app/.next
     ports:
       - 3000:3000
     networks:
@@ -51,6 +49,7 @@ services:
     environment:
       API_HOST: api
       API_PORT: 5000
+      DOCKER_API_ROOT_ENDPOINT: http://api:5000/api/
     depends_on:
       - api
 
