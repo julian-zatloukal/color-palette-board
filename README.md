@@ -23,6 +23,28 @@ The project is about a website that allows registered users to post, like, and s
    - jsonwebtoken (JWT)
 
 ## Instalation
+### Requirements
+The requirements for installing and running the project are docker, docker-compose, and nodejs with npm.
+### Clone repository and configure permissions
+```
+git clone https://github.com/julian-zatloukal/color-palette-board.git
+chmod 775 -R color-palette-board/
+```
+### Install dependencies
+```
+cd api/
+npm ci
+cd ../website/
+npm ci
+npm run build
+cd ..
+```
+### Build and run containers
+```
+cd api/
+docker-compose up --build
+```
+
 
 
 ## Screenshots
