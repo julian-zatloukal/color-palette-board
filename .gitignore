@@ -1,5 +1,5 @@
 # next.js build output
-website/.next/cache
+website/.next
 
 website/node_modules
 api/node_modules

@@ -1,4 +1,4 @@
-const Cookies = require("js-cookie");
+import Cookies from 'js-cookie'
 
 const apiRoot = process.env.NEXT_PUBLIC_API_ROOT_ENDPOINT
   ? process.env.NEXT_PUBLIC_API_ROOT_ENDPOINT
